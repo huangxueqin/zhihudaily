@@ -9,7 +9,10 @@ import android.view.WindowManager;
  */
 public class Constants {
     public static final String BASE_URL = "http://news-at.zhihu.com/api/";
-    private static final String URL_REQUEST_START_IMAGE = "http://news-at.zhihu.com/api/4/start-image";
+
+    public static class FragmentTags {
+        public static final String LATEST_NEWS_FRAGMENT_TAGS = "latest_news_fragment";
+    }
 
     public static Point getScreenSize(Context context) {
         Point size = new Point();
