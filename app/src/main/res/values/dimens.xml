@@ -3,6 +3,11 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-
     <dimen name="latest_news_top_stories_height">200dp</dimen>
+    <dimen name="latest_news_list_item_height">100dp</dimen>
+    <dimen name="latest_news_list_item_padding_vertical">10dp</dimen>
+    <dimen name="latest_news_list_item_padding_horizontal">15dp</dimen>
+    <dimen name="latest_news_list_item_thumb_width">85dp</dimen>
+    <dimen name="latest_news_list_item_thumb_height">80dp</dimen>
+    <dimen name="latest_news_list_item_text">17sp</dimen>
 </resources>

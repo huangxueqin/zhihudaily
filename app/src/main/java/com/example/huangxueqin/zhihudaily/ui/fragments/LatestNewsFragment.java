@@ -2,21 +2,77 @@ package com.example.huangxueqin.zhihudaily.ui.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.huangxueqin.zhihudaily.R;
+import com.example.huangxueqin.zhihudaily.interfaces.INewsListItemClickListener;
+import com.example.huangxueqin.zhihudaily.models.LatestNews;
+import com.example.huangxueqin.zhihudaily.ui.adapters.NewsListAdapter;
+import com.example.huangxueqin.zhihudaily.ui.widget.LineDecoration;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by huangxueqin on 16-7-22.
  */
-public class LatestNewsFragment extends BaseFragment {
+public class LatestNewsFragment extends BaseFragment implements Callback<LatestNews>, INewsListItemClickListener, SwipeRefreshLayout.OnRefreshListener {
+    private static final String TAG = "LatestNewsFragment TAG";
+
+    @BindView(R.id.news_refresher) SwipeRefreshLayout mRefresher;
+    @BindView(R.id.latest_news_list) RecyclerView mNewsList;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_latest_news, container, false);
+        ButterKnife.bind(this, v);
+        mRefresher.setOnRefreshListener(this);
+        mNewsList.setLayoutManager(new LinearLayoutManager(getContext()));
+        mNewsList.addItemDecoration(new LineDecoration(getContext()));
+        requestLatestNews();
         return v;
     }
 
+    void requestLatestNews() {
+        Call<LatestNews> call = mAPI.getLatestNews();
+        call.enqueue(this);
+    }
+
+    @Override
+    public void onResponse(Call<LatestNews> call, Response<LatestNews> response) {
+        mNewsList.setAdapter(new NewsListAdapter(response.body(), this));
+        if(mRefresher.isRefreshing()) {
+            mRefresher.setRefreshing(false);
+        }
+    }
+
+    @Override
+    public void onFailure(Call<LatestNews> call, Throwable t) {
+
+    }
+
+    @Override
+    public void onRequestNews(String id) {
+
+    }
+
+    @Override
+    public void onRefresh() {
+        D("onRefresh running");
+        requestLatestNews();
+    }
+
+    public static void D(String msg) {
+        Log.d(TAG, msg);
+    }
 }
