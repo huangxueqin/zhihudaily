@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.example.huangxueqin.zhihudaily.R;
 import com.example.huangxueqin.zhihudaily.interfaces.INewsListItemClickListener;
 import com.example.huangxueqin.zhihudaily.models.LatestNews;
+import com.example.huangxueqin.zhihudaily.ui.widget.CirclePageIndicator;
 
 import java.util.List;
 
@@ -84,6 +85,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         if(getItemViewType(position) == TYPE_HEADER) {
             if(holder.mTopStoriesGallery.getAdapter() == null) {
                 holder.mTopStoriesGallery.setAdapter(new TopNewAdapter(mLatestNews.top_stories));
+                holder.mPageIndicator.setViewPager(holder.mTopStoriesGallery);
             }
             holder.mTopStoriesGallery.addOnPageChangeListener(this);
             holder.mTopStoriesGallery.setCurrentItem(mCurrentHeaderItem);
@@ -123,6 +125,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         int mPosition;
         ViewPager mTopStoriesGallery;
+        CirclePageIndicator mPageIndicator;
         TextView mNewsTitle;
         ImageView mNewsThumb;
 
@@ -133,6 +136,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                 mNewsThumb = (ImageView) root.findViewById(R.id.news_thumb);
             } else {
                 mTopStoriesGallery = (ViewPager) root.findViewById(R.id.top_stories_gallery);
+                mPageIndicator = (CirclePageIndicator) root.findViewById(R.id.top_stories_indicator);
             }
             root.setOnClickListener(this);
         }
