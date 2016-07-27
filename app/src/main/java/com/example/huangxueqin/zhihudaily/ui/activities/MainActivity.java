@@ -16,7 +16,7 @@ import butterknife.ButterKnife;
 /**
  * Created by huangxueqin on 16-7-21.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
     BaseFragment mLatestNewsFragment = new LatestNewsFragment();
     FragmentTransaction mTransaction;
 
@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupFragmentOnce() {
+        mLatestNewsFragment.setAPI(mAPI);
         mTransaction = getSupportFragmentManager().beginTransaction();
         mTransaction.add(R.id.container, mLatestNewsFragment, Constants.FragmentTags.LATEST_NEWS_FRAGMENT_TAGS);
         mTransaction.commit();

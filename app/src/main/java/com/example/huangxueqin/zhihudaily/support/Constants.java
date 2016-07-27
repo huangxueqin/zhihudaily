@@ -14,6 +14,10 @@ public class Constants {
         public static final String LATEST_NEWS_FRAGMENT_TAGS = "latest_news_fragment";
     }
 
+    public static class IntentKeys {
+        public static final String KEY_NEWS_ID = "news_id";
+    }
+
     public static Point getScreenSize(Context context) {
         Point size = new Point();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);

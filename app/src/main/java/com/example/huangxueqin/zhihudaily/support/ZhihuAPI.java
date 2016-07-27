@@ -1,10 +1,12 @@
 package com.example.huangxueqin.zhihudaily.support;
 
 import com.example.huangxueqin.zhihudaily.models.LatestNews;
+import com.example.huangxueqin.zhihudaily.models.NewsContent;
 import com.example.huangxueqin.zhihudaily.models.StartImageInfo;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 
 /**
  * Created by huangxueqin on 16-7-22.
@@ -24,4 +26,7 @@ public interface ZhihuAPI {
 
     @GET("4/news/latest")
     Call<LatestNews> getLatestNews();
+
+    @GET("4/news/{id}")
+    Call<NewsContent> getNewsContent(@Path("id") String id);
 }

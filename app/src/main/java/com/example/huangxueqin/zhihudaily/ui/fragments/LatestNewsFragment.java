@@ -1,5 +1,6 @@
 package com.example.huangxueqin.zhihudaily.ui.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -13,8 +14,11 @@ import android.view.ViewGroup;
 import com.example.huangxueqin.zhihudaily.R;
 import com.example.huangxueqin.zhihudaily.interfaces.INewsListItemClickListener;
 import com.example.huangxueqin.zhihudaily.models.LatestNews;
+import com.example.huangxueqin.zhihudaily.support.Constants;
+import com.example.huangxueqin.zhihudaily.ui.activities.NewsPresentActivity;
 import com.example.huangxueqin.zhihudaily.ui.adapters.NewsListAdapter;
 import com.example.huangxueqin.zhihudaily.ui.widget.LineDecoration;
+import com.example.huangxueqin.zhihudaily.ui.widget.PullRefreshLayout;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,10 +29,10 @@ import retrofit2.Response;
 /**
  * Created by huangxueqin on 16-7-22.
  */
-public class LatestNewsFragment extends BaseFragment implements Callback<LatestNews>, INewsListItemClickListener, SwipeRefreshLayout.OnRefreshListener {
+public class LatestNewsFragment extends BaseFragment implements Callback<LatestNews>, INewsListItemClickListener, PullRefreshLayout.OnRefreshListener {
     private static final String TAG = "LatestNewsFragment TAG";
 
-    @BindView(R.id.news_refresher) SwipeRefreshLayout mRefresher;
+    @BindView(R.id.news_refresher) PullRefreshLayout mRefresher;
     @BindView(R.id.latest_news_list) RecyclerView mNewsList;
 
     @Nullable
@@ -63,7 +67,9 @@ public class LatestNewsFragment extends BaseFragment implements Callback<LatestN
 
     @Override
     public void onRequestNews(String id) {
-
+        Intent i = new Intent(getActivity(), NewsPresentActivity.class);
+        i.putExtra(Constants.IntentKeys.KEY_NEWS_ID, id);
+        startActivity(i);
     }
 
     @Override

@@ -19,11 +19,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.Callback;
 
-public class SplashActivity extends AppCompatActivity implements Callback<StartImageInfo> {
+public class SplashActivity extends BaseActivity implements Callback<StartImageInfo> {
     public static final String TAG = "SPLASH_SCREEN_TAG";
 
     @BindView(R.id.start_image) ImageView mStartImage;
@@ -47,21 +45,16 @@ public class SplashActivity extends AppCompatActivity implements Callback<StartI
     }
 
     private void loadStartImage() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        ZhihuAPI api = retrofit.create(ZhihuAPI.class);
         int screenWidth = (Constants.getScreenSize(this)).x;
         Call<StartImageInfo> call = null;
         if(screenWidth <= 320) {
-            call = api.get320StartImage();
+            call = mAPI.get320StartImage();
         } else if(screenWidth <= 480) {
-            call = api.get480StartImage();
+            call = mAPI.get480StartImage();
         } else if(screenWidth <= 720) {
-            call = api.get720StartImage();
+            call = mAPI.get720StartImage();
         } else {
-            call = api.get1080StartImage();
+            call = mAPI.get1080StartImage();
         }
         call.enqueue(this);
     }

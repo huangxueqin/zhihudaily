@@ -43,11 +43,17 @@ public class CirclePageIndicator extends View {
         super(context, attrs, defStyle);
         float density = getResources().getDisplayMetrics().density;
         int defaultDotSize = (int) (DOT_SIZE_DP * density);
-        TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CirclePageIndicator, defStyle, 0);
-        mDotSize = ta.getDimensionPixelSize(R.styleable.CirclePageIndicator_dot_size, defaultDotSize);
-        mSelectedColor = ta.getColor(R.styleable.CirclePageIndicator_dot_color_selected, SELECTED_COLOR);
-        mUnSelectedColor = ta.getColor(R.styleable.CirclePageIndicator_dot_color_unselected, UNSELECTED_COLOR);
-        ta.recycle();
+        if(attrs != null) {
+            TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CirclePageIndicator, defStyle, 0);
+            mDotSize = ta.getDimensionPixelSize(R.styleable.CirclePageIndicator_dot_size, defaultDotSize);
+            mSelectedColor = ta.getColor(R.styleable.CirclePageIndicator_dot_color_selected, SELECTED_COLOR);
+            mUnSelectedColor = ta.getColor(R.styleable.CirclePageIndicator_dot_color_unselected, UNSELECTED_COLOR);
+            ta.recycle();
+        } else {
+            mDotSize = defaultDotSize;
+            mSelectedColor = SELECTED_COLOR;
+            mUnSelectedColor = UNSELECTED_COLOR;
+        }
         mSelectedPaint = new Paint();
         mSelectedPaint.setColor(mSelectedColor);
         mSelectedPaint.setAntiAlias(true);
@@ -139,6 +145,7 @@ public class CirclePageIndicator extends View {
             int selectY = y;
             canvas.drawCircle(selectX+mCurrentOffset, selectY, mDotSize/2, mSelectedPaint);
         }
+        D("onDraw finished");
     }
 
     private ViewPager.OnPageChangeListener mViewPagerScrollListener = new ViewPager.OnPageChangeListener() {

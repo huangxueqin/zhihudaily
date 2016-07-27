@@ -5,4 +5,9 @@
         <attr name="dot_color_selected" format="color" />
         <attr name="dot_color_unselected" format="color" />
     </declare-styleable>
+
+
+    <declare-styleable name="PullRefreshLayout" >
+        <attr name="header_view" format="reference" />
+    </declare-styleable>
 </resources>
