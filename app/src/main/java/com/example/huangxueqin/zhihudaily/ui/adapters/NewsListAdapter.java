@@ -3,6 +3,7 @@ package com.example.huangxueqin.zhihudaily.ui.adapters;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,7 +85,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         holder.setPosition(position);
         if(getItemViewType(position) == TYPE_HEADER) {
             if(holder.mTopStoriesGallery.getAdapter() == null) {
-                holder.mTopStoriesGallery.setAdapter(new TopNewAdapter(mLatestNews.top_stories));
+                TopNewAdapter tna = new TopNewAdapter(mLatestNews.top_stories);
+                tna.setNewListClickListener(mListener);
+                holder.mTopStoriesGallery.setAdapter(tna);
                 holder.mPageIndicator.setViewPager(holder.mTopStoriesGallery);
             }
             holder.mTopStoriesGallery.addOnPageChangeListener(this);
@@ -134,11 +137,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             if(viewType == TYPE_LIST_ITEM) {
                 mNewsTitle = (TextView) root.findViewById(R.id.news_title);
                 mNewsThumb = (ImageView) root.findViewById(R.id.news_thumb);
+                root.setOnClickListener(this);
             } else {
                 mTopStoriesGallery = (ViewPager) root.findViewById(R.id.top_stories_gallery);
                 mPageIndicator = (CirclePageIndicator) root.findViewById(R.id.top_stories_indicator);
             }
-            root.setOnClickListener(this);
         }
 
         public void setPosition(int position) {
@@ -149,16 +152,14 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         public void onClick(View view) {
             String id = null;
             Object o = getItem(mPosition);
-            if(o instanceof LatestNews.Story) {
-                id = ((LatestNews.Story) o).id;
-            } else {
-                List<LatestNews.TopStory> topStories = (List<LatestNews.TopStory>) o;
-                id = topStories.get(mTopStoriesGallery.getCurrentItem()).id;
-            }
-
+            id = ((LatestNews.Story) o).id;
             if(mListener != null) {
                 mListener.onRequestNews(id);
             }
         }
+    }
+
+    private static void D(String msg) {
+        Log.d("NewListAdapter", msg);
     }
 }

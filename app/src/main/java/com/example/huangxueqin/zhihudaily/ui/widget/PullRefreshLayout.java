@@ -1,6 +1,7 @@
 package com.example.huangxueqin.zhihudaily.ui.widget;
 
 import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -8,15 +9,21 @@ import android.graphics.Color;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.TextView;
 
 import com.example.huangxueqin.zhihudaily.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by huangxueqin on 16-7-27.
@@ -24,7 +31,9 @@ import com.example.huangxueqin.zhihudaily.R;
 public class PullRefreshLayout extends ViewGroup {
     private static final int BG_LIGHT = 0xFFFAFAFA;
     private static final int BG_DARK = 0xFF888888;
-    private static final float DRAG_RATE = .35f;
+
+    private static final int ANIMATION_TO_START_DURATION = 200;
+    private static final int ANIMATION_TO_TRIGGER_DURATION  = 200;
 
     private View mTarget;
     private View mHeader;
@@ -34,16 +43,19 @@ public class PullRefreshLayout extends ViewGroup {
 
     private int mTouchSlop;
     private boolean mIsBeingDragged = false;
-    private int mActivePointId;
-    private int mInitDownY;
-    private int mLastDownY;
+    private int mActivePointId = -1;
+    private int mLastDownY = -1;
+    private int mSecondPointId = -1;
+    private SparseArray<Integer> mOtherPointerDownY = new SparseArray<>();
+    private List<Integer> mOtherPointerIds = new ArrayList<>();
 
     private int mRefreshThreshold;
     private OnRefreshListener mOnRefreshListener;
     private boolean mIsRefreshing;
-    private boolean mIsReturnToStart;
     private boolean mNotify;
-    private boolean mStopAnimation;
+    private boolean mStopAnimationOnTouchDown;
+
+    ValueAnimator mTransitAnimator;
 
     public static interface OnRefreshListener {
         void onRefresh();
@@ -66,6 +78,7 @@ public class PullRefreshLayout extends ViewGroup {
             headerViewId = ta.getResourceId(R.styleable.PullRefreshLayout_header_view, -1);
         }
         createHeaderView(headerViewId);
+        setWillNotDraw(false);
         setChildrenDrawingOrderEnabled(true);
     }
 
@@ -75,13 +88,21 @@ public class PullRefreshLayout extends ViewGroup {
             TextView tv = new TextView(getContext());
             tv.setBackgroundColor(Color.TRANSPARENT);
             tv.setText("下拉刷新");
-            tv.setPadding((int) (10 * density), (int) (20 * density), (int) (10 * density), (int) (20 * density));
+            tv.setTextColor(BG_DARK);
+            tv.setGravity(Gravity.CENTER);
+            tv.setPadding((int) (10 * density), (int) (30 * density), (int) (10 * density), (int) (30 * density));
             mHeader = tv;
         } else {
             mHeader = LayoutInflater.from(getContext()).inflate(resId, this, false);
         }
-        mHeader.setVisibility(GONE);
         addView(mHeader);
+    }
+
+    public void setCurrentTargetOffsetTop(int offsetTop) {
+        if(mCurrentTargetOffsetTop != offsetTop) {
+            mCurrentTargetOffsetTop = offsetTop;
+            requestLayout();
+        }
     }
 
     public void setOnRefreshListener(OnRefreshListener listener) {
@@ -101,64 +122,11 @@ public class PullRefreshLayout extends ViewGroup {
             return;
         }
         mIsRefreshing = refreshing;
-        mNotify = notify;
-        mStopAnimation = false;
-        int startValue = mCurrentTargetOffsetTop;
-        int endValue = 0;
         if(mIsRefreshing) {
-            endValue = 0;
-        } else {
-            endValue = mRefreshThreshold;
+            mNotify = notify;
+            animateToPostion(mCurrentTargetOffsetTop, 0, ANIMATION_TO_START_DURATION, mNotify);
         }
-        ValueAnimator scrollToStartAnimator = ValueAnimator.ofInt(startValue, endValue);
-        if(mIsRefreshing) {
-            scrollToStartAnimator.addListener(scrollerAnimatorListener);
-        }
-        scrollToStartAnimator.setDuration(500);
-        scrollToStartAnimator.addUpdateListener(mScrollAnimationUpdateListener);
-        scrollToStartAnimator.start();
     }
-
-    private ValueAnimator.AnimatorUpdateListener mScrollAnimationUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
-        @Override
-        public void onAnimationUpdate(ValueAnimator valueAnimator) {
-            if(!mStopAnimation) {
-                int value = (int) valueAnimator.getAnimatedValue();
-                mCurrentTargetOffsetTop = value;
-                requestLayout();
-            } else {
-                valueAnimator.cancel();
-            }
-        }
-    };
-
-    private ValueAnimator.AnimatorListener scrollerAnimatorListener = new ValueAnimator.AnimatorListener() {
-
-        @Override
-        public void onAnimationStart(Animator animator) {
-
-        }
-
-        @Override
-        public void onAnimationEnd(Animator animator) {
-            mIsRefreshing = false;
-            if(mNotify) {
-                if(mOnRefreshListener != null) {
-                    mOnRefreshListener.onRefresh();
-                }
-            }
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animator) {
-
-        }
-
-        @Override
-        public void onAnimationRepeat(Animator animator) {
-
-        }
-    };
 
     private void ensureTarget() {
         if(mTarget == null) {
@@ -197,11 +165,16 @@ public class PullRefreshLayout extends ViewGroup {
         }
         int width = getMeasuredWidth();
         int height = getMeasuredHeight();
+
+        if(mCurrentTargetOffsetTop == -1) {
+            mCurrentTargetOffsetTop = 0;
+        }
+
         mHeader.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST));
 
         mTarget.measure(MeasureSpec.makeMeasureSpec(width - getPaddingLeft() - getPaddingRight(), MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(height-getPaddingTop() - getPaddingBottom(), MeasureSpec.EXACTLY));
+                MeasureSpec.makeMeasureSpec(height-getPaddingTop() - getPaddingBottom() - Math.min(0, mCurrentTargetOffsetTop), MeasureSpec.EXACTLY));
 
         for(int i = 0; i < getChildCount(); i++) {
             if(getChildAt(i) == mHeader) {
@@ -210,16 +183,12 @@ public class PullRefreshLayout extends ViewGroup {
             }
         }
 
-        if(mCurrentTargetOffsetTop == -1) {
-            mCurrentTargetOffsetTop = 0;
-        }
         mRefreshThreshold = mHeader.getMeasuredHeight();
     }
 
     @Override
     protected void onLayout(boolean b, int i, int i1, int i2, int i3) {
         int width = getMeasuredWidth();
-        int height = getMeasuredHeight();
         if(getChildCount() == 0) {
             return;
         }
@@ -230,45 +199,62 @@ public class PullRefreshLayout extends ViewGroup {
             return;
         }
 
-        int offset = Math.max(0, mCurrentTargetOffsetTop);
+//        int offset = Math.max(0, mCurrentTargetOffsetTop);
+        int offset = mCurrentTargetOffsetTop;
         int targetLeft = getPaddingTop();
         int targetTop = offset + getPaddingTop();
         int targetRight = targetLeft + mTarget.getMeasuredWidth();
         int targetBottom = targetTop + mTarget.getMeasuredHeight();
         mTarget.layout(targetLeft, targetTop, targetRight, targetBottom);
-        mHeader.layout(width/2-mHeader.getMeasuredWidth()/2, -mHeader.getMeasuredHeight(),
-                width/2+mHeader.getMeasuredWidth()/2, 0);
+        mHeader.layout(width/2-mHeader.getMeasuredWidth()/2, offset-mHeader.getMeasuredHeight(),
+                width/2+mHeader.getMeasuredWidth()/2, offset);
 
+    }
+
+    private float computeDragRate(float offset) {
+        return (1 - Math.abs(offset)/getHeight()) * (1 - Math.abs(offset)/getHeight()) * (1 - Math.abs(offset)/getHeight()) ;
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         ensureTarget();
-        if(mTarget == null || mIsReturnToStart || canChildScrollUp()) {
+        if(mTarget == null || canChildScrollUp()) {
             return false;
         }
 
         final int action = ev.getActionMasked();
+        final int pointerIndex = ev.getActionIndex();
+        final int pointerId = ev.getPointerId(pointerIndex);
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mActivePointId = ev.getPointerId(0);
-                mInitDownY = (int) ev.getY();
-                mIsBeingDragged = false;
+                mLastDownY = (int) ev.getY();
+                mIsBeingDragged = mCurrentTargetOffsetTop != 0;
                 break;
             case MotionEvent.ACTION_MOVE:
-                int currentY = (int) ev.getY();
-                if(currentY - mInitDownY > mTouchSlop) {
-                    mLastDownY = mInitDownY + mTouchSlop;
-                    mIsBeingDragged = true;
+                if(pointerId == mActivePointId) {
+                    int currentY = (int) ev.getY();
+                    if(currentY - mLastDownY >= mTouchSlop) {
+                        mLastDownY = mLastDownY + mTouchSlop;
+                        mIsBeingDragged = true;
+                    }
+                } else {
+                    mOtherPointerDownY.put(pointerId, (int) ev.getY(pointerIndex));
                 }
                 break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                onSecondPointerDown(ev, pointerIndex);
+                break;
             case MotionEvent.ACTION_POINTER_UP:
-                onSecondaryPointUp(ev);
+                onSecondPointerUp(ev, pointerIndex);
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 mIsBeingDragged = false;
                 mActivePointId = -1;
+                mSecondPointId = -1;
+                mOtherPointerIds.clear();
+                mOtherPointerDownY.clear();
                 break;
         }
         return mIsBeingDragged;
@@ -276,51 +262,93 @@ public class PullRefreshLayout extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(mTarget == null|| mIsReturnToStart || canChildScrollUp()) {
+        if(mTarget == null || canChildScrollUp()) {
             return false;
         }
-        int action = event.getActionMasked();
-        int currentY = (int) event.getY();
+        final int action = event.getActionMasked();
+        final int pointerIndex = event.getActionIndex();
+        final int pointerId = event.getPointerId(pointerIndex);
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                mStopAnimationOnTouchDown = true;
                 mActivePointId = event.getPointerId(event.getActionIndex());
-                mIsBeingDragged = false;
                 break;
             case MotionEvent.ACTION_MOVE:
-                if(mIsBeingDragged) {
-                    int offset = (int) ((currentY - mLastDownY) * DRAG_RATE);
-                    if(offset != 0) {
-                        mCurrentTargetOffsetTop += offset;
-                        if(mCurrentTargetOffsetTop >= 0) {
-                            requestLayout();
+                if(pointerId == mActivePointId) {
+                    final int currentY = (int) event.getY();
+                    if (mIsBeingDragged) {
+                        int offset = (int) ((currentY - mLastDownY) * computeDragRate(mCurrentTargetOffsetTop));
+                        if (offset != 0) {
+                            int totalOffset = mCurrentTargetOffsetTop + offset;
+                            if (mCurrentTargetOffsetTop != totalOffset) {
+                                mCurrentTargetOffsetTop = totalOffset;
+                                if (mCurrentTargetOffsetTop >= mRefreshThreshold) {
+                                    ((TextView) mHeader).setText("释放立即刷新");
+                                } else {
+                                    ((TextView) mHeader).setText("下拉刷新");
+                                }
+                                requestLayout();
+                            }
                         }
+                        mLastDownY = currentY;
                     }
-                    mLastDownY = currentY;
+                } else {
+                    mOtherPointerDownY.put(pointerId, (int)event.getY(pointerIndex));
                 }
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
+                onSecondPointerDown(event, pointerIndex);
                 break;
             case MotionEvent.ACTION_POINTER_UP:
-                onSecondaryPointUp(event);
+                onSecondPointerUp(event, pointerIndex);
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 mIsBeingDragged = false;
                 mActivePointId = -1;
+                mSecondPointId = -1;
+                mOtherPointerDownY.clear();
+                mOtherPointerIds.clear();
                 releaseDrag();
                 break;
         }
         return true;
     }
 
-    public void onSecondaryPointUp(MotionEvent ev) {
-        int pointIndex = ev.getActionIndex();
-        int pointId = ev.getPointerId(pointIndex);
-        if(pointId == mActivePointId) {
-            int activeIndex = pointIndex == 0 ? 1 : 0;
-            mActivePointId = ev.getPointerId(activeIndex);
+    private void updateSecondPointerId(int secondPointId) {
+        mSecondPointId = -1;
+        for(int i = 0; i < mOtherPointerIds.size(); i++) {
+            if(mOtherPointerIds.get(i) != secondPointId) {
+                mSecondPointId = mOtherPointerIds.get(i);
+                break;
+            }
         }
+    }
 
+    private void onSecondPointerDown(MotionEvent event, int pointerIndex) {
+        int pointerId = event.getPointerId(pointerIndex);
+        if(mSecondPointId == -1) {
+            mSecondPointId = pointerId;
+        }
+        mOtherPointerIds.add(new Integer(pointerId));
+        mOtherPointerDownY.put(pointerId, (int) event.getY(pointerIndex));
+        D("put (" + pointerId + ", " + mOtherPointerDownY.get(pointerId) + ")");
+    }
+
+    private void onSecondPointerUp(MotionEvent event, int pointerIndex) {
+        int pointerId = event.getPointerId(pointerIndex);
+        int idToRemove = pointerId;
+        if(pointerId == mActivePointId || pointerId == mSecondPointId) {
+            idToRemove = mSecondPointId;
+            if(pointerId == mActivePointId) {
+                mActivePointId =  mSecondPointId;
+                mLastDownY = mOtherPointerDownY.get(mSecondPointId);
+                D("get (" + mSecondPointId + ", " + mOtherPointerDownY.get(mSecondPointId) + ")");
+            }
+            updateSecondPointerId(mSecondPointId);
+        }
+        mOtherPointerDownY.remove(idToRemove);
+        mOtherPointerIds.remove(new Integer(idToRemove));
     }
 
     public boolean canChildScrollUp() {
@@ -342,8 +370,56 @@ public class PullRefreshLayout extends ViewGroup {
             setRefreshing(true, true);
         }
         else {
-
+            animateToPostion(mCurrentTargetOffsetTop, 0, ANIMATION_TO_START_DURATION, false);
         }
+    }
+
+    private void initTransitAnimation(int start, int end, int duration) {
+        mTransitAnimator = ObjectAnimator.ofInt(this, "CurrentTargetOffsetTop", start, end);
+        mTransitAnimator.setInterpolator(new DecelerateInterpolator());
+        mTransitAnimator.setDuration(duration);
+        mTransitAnimator.addUpdateListener(mTransitAnimatorUpdateListener);
+    }
+
+    private ValueAnimator.AnimatorListener mTransitAnimatorListener = new ValueAnimator.AnimatorListener() {
+        @Override
+        public void onAnimationStart(Animator animator) {
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animator) {
+            if(mNotify) {
+                if(mOnRefreshListener != null) {
+                    mOnRefreshListener.onRefresh();
+                }
+                mNotify = false;
+            }
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animator) {
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animator) {
+        }
+    };
+
+    private ValueAnimator.AnimatorUpdateListener mTransitAnimatorUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator valueAnimator) {
+            if(mStopAnimationOnTouchDown) {
+                valueAnimator.cancel();
+                mStopAnimationOnTouchDown = false;
+            }
+        }
+    };
+
+    private void animateToPostion(int start, int end, int duration, boolean notify) {
+        initTransitAnimation(start, end, duration);
+        mTransitAnimator.addUpdateListener(mTransitAnimatorUpdateListener);
+        mTransitAnimator.addListener(mTransitAnimatorListener);
+        mTransitAnimator.start();
     }
 
     private static void D(String msg) {

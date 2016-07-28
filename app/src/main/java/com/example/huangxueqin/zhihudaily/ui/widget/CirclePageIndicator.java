@@ -93,7 +93,6 @@ public class CirclePageIndicator extends View {
         } else if(heightMode == MeasureSpec.UNSPECIFIED) {
             height = mDotSize + paddingVertical;
         }
-        D("width = " + width + ", height = " + height);
         setMeasuredDimension(width, height);
     }
 
@@ -123,12 +122,10 @@ public class CirclePageIndicator extends View {
         if(mNumPages > 0) {
             requestLayout();
         }
-        D("mNumPages = " + mNumPages);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        D("onDraw running");
         super.onDraw(canvas);
         if(mNumPages > 0) {
             int w = getWidth();
@@ -145,14 +142,13 @@ public class CirclePageIndicator extends View {
             int selectY = y;
             canvas.drawCircle(selectX+mCurrentOffset, selectY, mDotSize/2, mSelectedPaint);
         }
-        D("onDraw finished");
     }
 
     private ViewPager.OnPageChangeListener mViewPagerScrollListener = new ViewPager.OnPageChangeListener() {
 
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            D("position = " + position + ", positionOffset = " + positionOffset + ", positionOffsetPixels = " + positionOffsetPixels);
+//            D("position = " + position + ", positionOffset = " + positionOffset + ", positionOffsetPixels = " + positionOffsetPixels);
             mCurrentPosition = position;
             mCurrentOffset = (int) (2 * mDotSize * positionOffset);
             invalidate();
@@ -160,7 +156,6 @@ public class CirclePageIndicator extends View {
 
         @Override
         public void onPageSelected(int position) {
-            D("current position = " + position);
             mCurrentOffset = 0;
             mCurrentPosition = position;
             invalidate();

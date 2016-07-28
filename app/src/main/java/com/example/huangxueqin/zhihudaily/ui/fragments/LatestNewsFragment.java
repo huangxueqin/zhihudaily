@@ -34,6 +34,7 @@ public class LatestNewsFragment extends BaseFragment implements Callback<LatestN
 
     @BindView(R.id.news_refresher) PullRefreshLayout mRefresher;
     @BindView(R.id.latest_news_list) RecyclerView mNewsList;
+    private boolean mCancel;
 
     @Nullable
     @Override
@@ -54,15 +55,23 @@ public class LatestNewsFragment extends BaseFragment implements Callback<LatestN
 
     @Override
     public void onResponse(Call<LatestNews> call, Response<LatestNews> response) {
-        mNewsList.setAdapter(new NewsListAdapter(response.body(), this));
-        if(mRefresher.isRefreshing()) {
-            mRefresher.setRefreshing(false);
+        if(!mCancel) {
+            mNewsList.setAdapter(new NewsListAdapter(response.body(), this));
+            if (mRefresher.isRefreshing()) {
+                mRefresher.setRefreshing(false);
+            }
         }
     }
 
     @Override
     public void onFailure(Call<LatestNews> call, Throwable t) {
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mCancel = true;
     }
 
     @Override
