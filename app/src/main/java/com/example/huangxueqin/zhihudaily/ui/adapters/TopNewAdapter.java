@@ -1,5 +1,6 @@
 package com.example.huangxueqin.zhihudaily.ui.adapters;
 
+import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
@@ -40,6 +41,7 @@ public class TopNewAdapter extends PagerAdapter implements View.OnClickListener 
         ImageView image = new ImageView(container.getContext());
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewPager.LayoutParams.MATCH_PARENT, ViewPager.LayoutParams.MATCH_PARENT);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        image.setColorFilter(Color.rgb(180, 180, 180), android.graphics.PorterDuff.Mode.MULTIPLY);
         container.addView(image, lp);
         Glide.with(container.getContext())
                 .load(url)
