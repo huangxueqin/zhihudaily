@@ -82,7 +82,6 @@ public class LatestNewsFragment extends BaseFragment implements Callback<LatestN
 
     @Override
     public void onRefresh() {
-        D("onRefresh running");
         requestLatestNews();
     }
 

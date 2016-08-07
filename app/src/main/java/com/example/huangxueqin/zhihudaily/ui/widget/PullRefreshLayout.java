@@ -56,15 +56,15 @@ public class PullRefreshLayout extends ViewGroup {
     private OnRefreshListener mOnRefreshListener;
     private int mRefreshOffsetTop;
     private boolean mIsRefreshing;
+    private boolean mWillReleaseToRefresh;
     private boolean mForceRefresh;
     private boolean mForceReset;
 
+    private ValueAnimator mDefaultForceRefreshAnimator;
+    private ValueAnimator mDefaultForceResetAnimator;
+    private ValueAnimator mDefaultCancellableResetAnimator;
+
     private Handler mMainHandler;
-
-    private ValueAnimator mForceRefreshAnimator;
-    private ValueAnimator mReleaseToRefreshAnimator;
-    private ValueAnimator mResetAnimator;
-
 
     public static interface OnRefreshListener {
         void onRefresh();
@@ -90,7 +90,7 @@ public class PullRefreshLayout extends ViewGroup {
         setWillNotDraw(false);
         setChildrenDrawingOrderEnabled(true);
         mMainHandler = new Handler(Looper.getMainLooper());
-        initAnimators();
+        mWillReleaseToRefresh = true;
     }
 
     private void createHeaderView(int resId) {
@@ -113,7 +113,7 @@ public class PullRefreshLayout extends ViewGroup {
         if(mCurrentTargetOffsetTop != offsetTop) {
             mCurrentTargetOffsetTop = offsetTop;
             requestLayout();
-            if(!mIsRefreshing) {
+            if(mWillReleaseToRefresh) {
                 setHeaderForCurrentOffsetTop();
             }
         }
@@ -133,12 +133,15 @@ public class PullRefreshLayout extends ViewGroup {
         }
         if(refreshing) {
             mForceRefresh = true;
-            mForceRefreshAnimator.start();
+            onForceRefresh(mCurrentTargetOffsetTop);
         }
         else {
             mIsRefreshing = false;
             if(mCurrentTargetOffsetTop > 0) {
                 setHeaderViewForRefreshComplete();
+            }
+            else {
+                mWillReleaseToRefresh = true;
             }
         }
     }
@@ -168,6 +171,7 @@ public class PullRefreshLayout extends ViewGroup {
     }
 
     private void onRefresh() {
+        mWillReleaseToRefresh = false;
         setHeaderForRefreshOnGoing();
         if(mOnRefreshListener != null) {
             mOnRefreshListener.onRefresh();
@@ -230,6 +234,7 @@ public class PullRefreshLayout extends ViewGroup {
         }
 
         mRefreshOffsetTop = mHeader.getMeasuredHeight();
+        initAnimators();
     }
 
     @Override
@@ -411,32 +416,56 @@ public class PullRefreshLayout extends ViewGroup {
     }
 
     private void releaseDrag() {
-        D("releaseDrag running, mIsRefreshing = " + mIsRefreshing);
-        if(!mIsRefreshing && mCurrentTargetOffsetTop >= mRefreshOffsetTop) {
+        if(mWillReleaseToRefresh && !mIsRefreshing && mCurrentTargetOffsetTop >= mRefreshOffsetTop) {
             mIsRefreshing = true;
             onRefresh();
-            mReleaseToRefreshAnimator.start();
+            onReleaseToRefresh(mCurrentTargetOffsetTop);
         }
         else {
-            mResetAnimator.start();
+            onReleaseToReset(mCurrentTargetOffsetTop);
         }
     }
 
-    private Runnable mForceResetRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mForceReset = true;
-            ValueAnimator animator = initTransitAnimation(mCurrentTargetOffsetTop, 0, ANIMATION_FORCE_REFRESH_DURATION);
-            animator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    mForceReset = false;
-                }
-            });
+    private void onForceRefresh(int startPos) {
+        if(startPos == 0) {
+            mDefaultForceRefreshAnimator.start();
+        }
+        else {
+            ValueAnimator animator = initTransitAnimation(startPos, mRefreshOffsetTop, ANIMATION_FORCE_REFRESH_DURATION);
+            animator.addListener(mForceRefreshListener);
             animator.start();
         }
-    };
+    }
+
+    private void onReleaseToRefresh(int startPos) {
+        ValueAnimator animator = initTransitAnimation(startPos, mRefreshOffsetTop, ANIMATION_FORCE_REFRESH_DURATION);
+        animator.addUpdateListener(mCancellableUpdateListener);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if(mIsRefreshing) {
+                    mMainHandler.postDelayed(mForceResetRunnable, ANIMATION_FLOATING_TIME);
+                } else {
+                    mMainHandler.postDelayed(mForceResetRunnable, ANIMATION_FLOATING_TIME / 2);
+                }
+            }
+        });
+        animator.start();
+    }
+
+    private void onReleaseToReset(int startPos) {
+        ValueAnimator animator = null;
+        if(startPos == mRefreshOffsetTop) {
+            animator = mDefaultCancellableResetAnimator;
+        }
+        else {
+            animator = initTransitAnimation(startPos, 0, ANIMATION_DURATION);
+            animator.addUpdateListener(mCancellableUpdateListener);
+            animator.addListener(mCancellableResetListener);
+        }
+        animator.start();
+    }
 
     private ValueAnimator initTransitAnimation(int start, int end, int duration) {
         ObjectAnimator transitAnimator = ObjectAnimator.ofInt(this, "CurrentTargetOffsetTop", start, end);
@@ -445,56 +474,80 @@ public class PullRefreshLayout extends ViewGroup {
         return transitAnimator;
     }
 
+    private AnimatorListenerAdapter mForceRefreshListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            super.onAnimationEnd(animation);
+            mIsRefreshing = true;
+            mForceRefresh = false;
+            onRefresh();
+            mMainHandler.postDelayed(mForceResetRunnable, ANIMATION_FLOATING_TIME);
+        }
+    };
+
+    private AnimatorListenerAdapter mForceResetListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            super.onAnimationEnd(animation);
+            mForceReset = false;
+            if(!mIsRefreshing) {
+                mWillReleaseToRefresh = true;
+            }
+            setHeaderForCurrentOffsetTop();
+        }
+    };
+
+    private AnimatorListenerAdapter mCancellableResetListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            super.onAnimationEnd(animation);
+            if(!mIsRefreshing) {
+                mWillReleaseToRefresh = true;
+            }
+            setHeaderForCurrentOffsetTop();
+        }
+    };
+
+    private ValueAnimator.AnimatorUpdateListener mCancellableUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator valueAnimator) {
+            if(mIsBeingDragged) {
+                valueAnimator.cancel();
+            }
+        }
+    };
+
+    private Runnable mForceResetRunnable = new Runnable() {
+        @Override
+        public void run() {
+            D("mForceResetRunnable running");
+            mForceReset = true;
+            ValueAnimator animator = null;
+            if(mCurrentTargetOffsetTop == mRefreshOffsetTop) {
+                D("use default animator");
+                animator = mDefaultForceResetAnimator;
+            }
+            else {
+                animator = initTransitAnimation(mCurrentTargetOffsetTop, 0, ANIMATION_FORCE_REFRESH_DURATION);
+                animator.addListener(mForceResetListener);
+            }
+            animator.start();
+        }
+    };
+
     private void initAnimators() {
-        // init mForceRefreshAnimator
-        mForceRefreshAnimator = initTransitAnimation(mCurrentTargetOffsetTop,
-                mRefreshOffsetTop, ANIMATION_FORCE_REFRESH_DURATION);
-        mForceRefreshAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                mIsRefreshing = true;
-                mForceRefresh = false;
-                onRefresh();
+        // init mDefaultForceRefreshAnimator
+        mDefaultForceRefreshAnimator = initTransitAnimation(0, mRefreshOffsetTop, ANIMATION_FORCE_REFRESH_DURATION);
+        mDefaultForceRefreshAnimator.addListener(mForceRefreshListener);
 
-            }
-        });
+        // init mDefaultForceResetAnimator
+        mDefaultForceResetAnimator = initTransitAnimation(mRefreshOffsetTop, 0, ANIMATION_DURATION);
+        mDefaultForceResetAnimator.addListener(mForceResetListener);
 
-        // init releaseToRefreshAnimator
-        mReleaseToRefreshAnimator = initTransitAnimation(mCurrentTargetOffsetTop,
-                mRefreshOffsetTop, ANIMATION_FORCE_REFRESH_DURATION);
-        mReleaseToRefreshAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                if(mIsBeingDragged) {
-                    valueAnimator.cancel();
-                }
-                if(!mIsRefreshing) {
-                    valueAnimator.cancel();
-                    mResetAnimator.start();
-                }
-            }
-        });
-        mReleaseToRefreshAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                if(mIsRefreshing) {
-                    mMainHandler.postDelayed(mForceResetRunnable, ANIMATION_FLOATING_TIME);
-                }
-            }
-        });
-
-        // init mResetAnimator
-        mResetAnimator = initTransitAnimation(mCurrentTargetOffsetTop, 0, ANIMATION_DURATION);
-        mResetAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                if(mIsBeingDragged) {
-                    valueAnimator.cancel();
-                }
-            }
-        });
+        // init mDefaultCancellableResetAnimator
+        mDefaultCancellableResetAnimator = initTransitAnimation(mRefreshOffsetTop, 0, ANIMATION_DURATION);
+        mDefaultCancellableResetAnimator.addUpdateListener(mCancellableUpdateListener);
+        mDefaultCancellableResetAnimator.addListener(mCancellableResetListener);
     }
 
     private static void D(String msg) {
