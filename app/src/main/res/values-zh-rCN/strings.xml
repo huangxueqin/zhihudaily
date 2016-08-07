@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">知乎日报</string>
+
+
+    <!-- strings for PullRefreshLayout -->
+    <string name="refresh_complete">刷新完成</string>
+    <string name="refresh_prompt_pull_down">下拉立即刷新</string>
+    <string name="refresh_prompt_release">释放刷新</string>
+    <string name="refresh_ongoing">正在刷新</string>
 </resources>
