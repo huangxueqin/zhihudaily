@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
-import com.example.huangxueqin.zhihudaily.support.Constants;
-import com.example.huangxueqin.zhihudaily.support.ZhihuAPI;
+import com.example.huangxueqin.zhihudaily.common.Constants;
+import com.example.huangxueqin.zhihudaily.common.ZhihuAPI;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

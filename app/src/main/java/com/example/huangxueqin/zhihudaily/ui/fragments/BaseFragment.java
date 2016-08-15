@@ -3,11 +3,7 @@ package com.example.huangxueqin.zhihudaily.ui.fragments;
 import android.support.v4.app.Fragment;
 
 import com.example.huangxueqin.zhihudaily.interfaces.IFragmentCallback;
-import com.example.huangxueqin.zhihudaily.support.Constants;
-import com.example.huangxueqin.zhihudaily.support.ZhihuAPI;
-
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import com.example.huangxueqin.zhihudaily.common.ZhihuAPI;
 
 /**
  * Created by huangxueqin on 16-7-22.

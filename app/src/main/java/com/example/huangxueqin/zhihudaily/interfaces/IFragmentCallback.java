@@ -1,6 +1,6 @@
 package com.example.huangxueqin.zhihudaily.interfaces;
 
-import com.example.huangxueqin.zhihudaily.support.ZhihuAPI;
+import com.example.huangxueqin.zhihudaily.common.ZhihuAPI;
 
 /**
  * Created by huangxueqin on 16-7-26.

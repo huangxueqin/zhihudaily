@@ -1,5 +1,6 @@
-package com.example.huangxueqin.zhihudaily.support;
+package com.example.huangxueqin.zhihudaily.common;
 
+import com.example.huangxueqin.zhihudaily.models.HistoryNews;
 import com.example.huangxueqin.zhihudaily.models.LatestNews;
 import com.example.huangxueqin.zhihudaily.models.NewsContent;
 import com.example.huangxueqin.zhihudaily.models.StartImageInfo;
@@ -29,4 +30,7 @@ public interface ZhihuAPI {
 
     @GET("4/news/{id}")
     Call<NewsContent> getNewsContent(@Path("id") String id);
+
+    @GET("4/news/before/{date}")
+    Call<HistoryNews> getHistoryNews(@Path("date") String date);
 }

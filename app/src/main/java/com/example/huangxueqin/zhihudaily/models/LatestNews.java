@@ -10,14 +10,6 @@ public class LatestNews {
     public ArrayList<Story> stories;
     public ArrayList<TopStory> top_stories;
 
-    public static class Story {
-        public String title;
-        public String ga_prefix;
-        public ArrayList<String> images;
-        public Integer type;
-        public String id;
-    }
-
     public static class TopStory {
         public String title;
         public String ga_prefix;

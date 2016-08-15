@@ -1,9 +1,7 @@
 package com.example.huangxueqin.zhihudaily.ui.activities;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
@@ -12,8 +10,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.huangxueqin.zhihudaily.R;
 import com.example.huangxueqin.zhihudaily.models.StartImageInfo;
-import com.example.huangxueqin.zhihudaily.support.Constants;
-import com.example.huangxueqin.zhihudaily.support.ZhihuAPI;
+import com.example.huangxueqin.zhihudaily.common.Constants;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

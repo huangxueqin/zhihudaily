@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.example.huangxueqin.zhihudaily.R;
 import com.example.huangxueqin.zhihudaily.interfaces.INewsListItemClickListener;
 import com.example.huangxueqin.zhihudaily.models.LatestNews;
+import com.example.huangxueqin.zhihudaily.models.Story;
 import com.example.huangxueqin.zhihudaily.ui.widget.CirclePageIndicator;
 
 import java.util.List;
@@ -25,9 +26,11 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     public static final int TYPE_HEADER = 0;
     public static final int TYPE_LIST_ITEM = 1;
 
-    private LatestNews mLatestNews;
+    private List<LatestNews.TopStory> mTopStories;
+    private List<Story> mStories;
     private int mCurrentHeaderItem;
     private INewsListItemClickListener mListener;
+    private int mHistoryCount = 0;
 
     public NewsListAdapter(LatestNews latestNews) {
         this(latestNews, null, 0);
@@ -42,14 +45,25 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     public NewsListAdapter(LatestNews latestNews, INewsListItemClickListener listener, int currentHeaderItem) {
-        mLatestNews = latestNews;
+        mTopStories = latestNews.top_stories;
+        mStories = latestNews.stories;
         mCurrentHeaderItem = currentHeaderItem;
         mListener = listener;
     }
 
+    public void addHistoryNews(List<Story> historyNews) {
+        mStories.addAll(historyNews);
+        mHistoryCount += 1;
+        notifyDataSetChanged();
+    }
+
+    public int getNextHistoryIndex() {
+        return mHistoryCount + 1;
+    }
+
     @Override
     public int getItemViewType(int position) {
-        if(position == 0 && mLatestNews.top_stories != null && mLatestNews.top_stories.size() > 0) {
+        if(position == 0 && mTopStories != null && mTopStories.size() > 0) {
             return TYPE_HEADER;
         } else {
             return TYPE_LIST_ITEM;
@@ -58,9 +72,9 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     public Object getItem(int position) {
         if(hasHeader()) {
-            return position == 0 ? mLatestNews.top_stories : mLatestNews.stories.get(position-1);
+            return position == 0 ? mTopStories : mStories.get(position-1);
         } else {
-            return mLatestNews.stories.get(position);
+            return mStories.get(position);
         }
     }
 
@@ -85,7 +99,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         holder.setPosition(position);
         if(getItemViewType(position) == TYPE_HEADER) {
             if(holder.mTopStoriesGallery.getAdapter() == null) {
-                TopNewAdapter tna = new TopNewAdapter(mLatestNews.top_stories);
+                TopNewAdapter tna = new TopNewAdapter(mTopStories);
                 tna.setNewListClickListener(mListener);
                 holder.mTopStoriesGallery.setAdapter(tna);
                 holder.mPageIndicator.setViewPager(holder.mTopStoriesGallery);
@@ -93,7 +107,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             holder.mTopStoriesGallery.addOnPageChangeListener(this);
             holder.mTopStoriesGallery.setCurrentItem(mCurrentHeaderItem);
         } else {
-            LatestNews.Story story = (LatestNews.Story) getItem(position);
+            Story story = (Story) getItem(position);
             holder.mNewsTitle.setText(story.title);
             Glide.with(holder.mNewsThumb.getContext())
                     .load(story.images.get(0))
@@ -103,9 +117,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     @Override
     public int getItemCount() {
-        if(mLatestNews != null) {
-            return (mLatestNews.stories == null ? 0 : mLatestNews.stories.size()) +
-                    (mLatestNews.top_stories == null ? 0 : 1);
+        if(mStories != null) {
+            return mStories.size() + ((mTopStories == null || mTopStories.size() == 0) ? 0 : 1);
         }
         return 0;
     }
@@ -152,7 +165,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         public void onClick(View view) {
             String id = null;
             Object o = getItem(mPosition);
-            id = ((LatestNews.Story) o).id;
+            id = ((Story) o).id;
             if(mListener != null) {
                 mListener.onRequestNews(id);
             }

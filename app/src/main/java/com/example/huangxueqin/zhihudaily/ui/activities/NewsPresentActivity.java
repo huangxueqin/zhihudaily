@@ -2,12 +2,11 @@ package com.example.huangxueqin.zhihudaily.ui.activities;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.webkit.WebView;
 
 import com.example.huangxueqin.zhihudaily.R;
 import com.example.huangxueqin.zhihudaily.models.NewsContent;
-import com.example.huangxueqin.zhihudaily.support.Constants;
+import com.example.huangxueqin.zhihudaily.common.Constants;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

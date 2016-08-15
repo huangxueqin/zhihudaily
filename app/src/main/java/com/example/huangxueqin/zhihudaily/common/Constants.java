@@ -1,4 +1,4 @@
-package com.example.huangxueqin.zhihudaily.support;
+package com.example.huangxueqin.zhihudaily.common;
 
 import android.content.Context;
 import android.graphics.Point;

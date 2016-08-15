@@ -3,14 +3,12 @@ package com.example.huangxueqin.zhihudaily.ui.activities;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 
 import com.example.huangxueqin.zhihudaily.R;
-import com.example.huangxueqin.zhihudaily.support.Constants;
+import com.example.huangxueqin.zhihudaily.common.Constants;
 import com.example.huangxueqin.zhihudaily.ui.fragments.BaseFragment;
 import com.example.huangxueqin.zhihudaily.ui.fragments.LatestNewsFragment;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
