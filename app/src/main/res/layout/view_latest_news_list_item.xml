@@ -13,7 +13,7 @@
         android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:textColor="@color/dark_gray"
+        android:textColor="@color/item_unread"
         android:textSize="@dimen/latest_news_list_item_text"
         android:textStyle="bold"/>
     <ImageView

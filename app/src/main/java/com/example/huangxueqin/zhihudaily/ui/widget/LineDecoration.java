@@ -3,7 +3,6 @@ package com.example.huangxueqin.zhihudaily.ui.widget;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
@@ -18,7 +17,7 @@ public class LineDecoration extends RecyclerView.ItemDecoration {
 
     public LineDecoration(Context context) {
         mPaint = new Paint();
-        mPaint.setColor(context.getResources().getColor(R.color.gray));
+        mPaint.setColor(context.getResources().getColor(R.color.light_gray));
     }
 
     @Override

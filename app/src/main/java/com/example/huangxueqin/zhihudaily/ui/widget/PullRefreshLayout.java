@@ -142,6 +142,7 @@ public class PullRefreshLayout extends ViewGroup {
             }
             else {
                 mWillReleaseToRefresh = true;
+                setHeaderForCurrentOffsetTop();
             }
         }
     }
@@ -444,10 +445,9 @@ public class PullRefreshLayout extends ViewGroup {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                if(mIsRefreshing) {
-                    mMainHandler.postDelayed(mForceResetRunnable, ANIMATION_FLOATING_TIME);
-                } else {
-                    mMainHandler.postDelayed(mForceResetRunnable, ANIMATION_FLOATING_TIME / 2);
+                if(!mIsBeingDragged) {
+                    long delay = mIsRefreshing ? ANIMATION_FLOATING_TIME : ANIMATION_FLOATING_TIME / 2;
+                    mMainHandler.postDelayed(mForceResetRunnable, delay);
                 }
             }
         });
@@ -492,8 +492,8 @@ public class PullRefreshLayout extends ViewGroup {
             mForceReset = false;
             if(!mIsRefreshing) {
                 mWillReleaseToRefresh = true;
+                setHeaderForCurrentOffsetTop();
             }
-            setHeaderForCurrentOffsetTop();
         }
     };
 
