@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/latest_news_list_header_height">
+    <TextView
+        android:id="@+id/item_header"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textColor="@color/item_header_text"
+        android:textSize="@dimen/latest_news_list_header_text"
+        android:paddingLeft="@dimen/latest_news_list_header_padding_horizontal"
+        android:paddingRight="@dimen/latest_news_list_header_padding_horizontal"
+        android:gravity="center_vertical"
+        android:background="@android:color/transparent"/>
+</LinearLayout>

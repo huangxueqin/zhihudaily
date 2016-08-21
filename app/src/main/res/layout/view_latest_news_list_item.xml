@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-    android:background="?attr/selectableItemBackground"
+    android:background="@drawable/touchable_background_white"
     android:layout_width="match_parent"
     android:layout_height="@dimen/latest_news_list_item_height"
     android:paddingTop="@dimen/latest_news_list_item_padding_vertical"

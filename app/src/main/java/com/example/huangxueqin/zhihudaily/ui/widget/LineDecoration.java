@@ -13,11 +13,15 @@ import com.example.huangxueqin.zhihudaily.ui.adapters.NewsListAdapter;
  * Created by huangxueqin on 16-7-25.
  */
 public class LineDecoration extends RecyclerView.ItemDecoration {
+    private static final int LINE_PADDING_DP = 10;
+
     Paint mPaint;
+    int mLinePadding;
 
     public LineDecoration(Context context) {
         mPaint = new Paint();
-        mPaint.setColor(context.getResources().getColor(R.color.light_gray));
+        mPaint.setColor(context.getResources().getColor(R.color.item_line_sep));
+        mLinePadding = (int) context.getResources().getDisplayMetrics().density * LINE_PADDING_DP;
     }
 
     @Override
@@ -28,8 +32,8 @@ public class LineDecoration extends RecyclerView.ItemDecoration {
             for (int i = 0; i < count - 1; i++) {
                 View child = parent.getChildAt(i);
                 int position = parent.getLayoutManager().getPosition(child);
-                if (adapter.getItemViewType(position) == NewsListAdapter.TYPE_LIST_ITEM) {
-                    c.drawLine(0, child.getBottom(), parent.getWidth(), child.getBottom(), mPaint);
+                if (adapter.getItemViewType(position) == NewsListAdapter.TYPE_LIST_ITEM_NEWS) {
+                    c.drawLine(mLinePadding, child.getBottom(), parent.getWidth() - mLinePadding, child.getBottom(), mPaint);
                 }
             }
         }

@@ -7,5 +7,5 @@ import java.util.ArrayList;
  */
 public class HistoryNews {
     public String date;
-    public ArrayList<Story> stories;
+    public ArrayList<News> stories;
 }

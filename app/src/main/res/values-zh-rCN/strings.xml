@@ -8,4 +8,6 @@
     <string name="refresh_prompt_pull_down">下拉立即刷新</string>
     <string name="refresh_prompt_release">释放刷新</string>
     <string name="refresh_ongoing">正在刷新</string>
+
+    <string name="today_news_header">今日热闻</string>
 </resources>

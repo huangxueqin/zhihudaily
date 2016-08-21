@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public class LatestNews {
     public String date;
-    public ArrayList<Story> stories;
+    public ArrayList<News> stories;
     public ArrayList<TopStory> top_stories;
 
     public static class TopStory {

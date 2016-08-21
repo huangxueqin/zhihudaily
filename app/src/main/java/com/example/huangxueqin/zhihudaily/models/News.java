@@ -5,7 +5,8 @@ import java.util.ArrayList;
 /**
  * Created by huangxueqin on 16/8/9.
  */
-public class Story {
+public class News {
+    public String date;
     public String title;
     public String ga_prefix;
     public ArrayList<String> images;

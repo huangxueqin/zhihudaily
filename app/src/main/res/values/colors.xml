@@ -16,4 +16,6 @@
 
     <color name="item_unread">@color/dark_gray</color>
     <color name="item_read">@color/light_gray</color>
+    <color name="item_line_sep">#A0A0A0</color>
+    <color name="item_header_text">#808080</color>
 </resources>

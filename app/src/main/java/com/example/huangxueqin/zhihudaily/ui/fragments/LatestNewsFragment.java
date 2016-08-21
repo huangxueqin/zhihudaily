@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.huangxueqin.zhihudaily.R;
-import com.example.huangxueqin.zhihudaily.common.Utilities;
+import com.example.huangxueqin.zhihudaily.common.DateTools;
 import com.example.huangxueqin.zhihudaily.interfaces.INewsListItemClickListener;
 import com.example.huangxueqin.zhihudaily.models.HistoryNews;
 import com.example.huangxueqin.zhihudaily.models.LatestNews;
@@ -93,7 +93,7 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
             if(!mCancel) {
                 NewsListAdapter adapter = (NewsListAdapter) mNewsList.getAdapter();
                 HistoryNews historyNews = response.body();
-                adapter.addHistoryNews(response.body().stories);
+                adapter.addHistoryNews(response.body());
             }
             mIsLoadHistoryNews = false;
         }
@@ -122,7 +122,7 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
             super.onScrolled(recyclerView, dx, dy);
             if(dy > 0 && !canNewsListScrollDown() && !mIsLoadHistoryNews) {
                 NewsListAdapter adapter = (NewsListAdapter) mNewsList.getAdapter();
-                requestNewsByAction(RequestAction.ACTION_REQUEST_HISTORY, Utilities.getDateStr(-adapter.getNextHistoryIndex()));
+                requestNewsByAction(RequestAction.ACTION_REQUEST_HISTORY, adapter.getNextDateUnloaded());
                 mIsLoadHistoryNews = true;
             }
         }
