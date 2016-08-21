@@ -1,5 +1,7 @@
 package com.example.huangxueqin.zhihudaily.ui.adapters;
 
+import android.content.ContentValues;
+import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -16,9 +18,11 @@ import com.example.huangxueqin.zhihudaily.interfaces.INewsListItemClickListener;
 import com.example.huangxueqin.zhihudaily.models.HistoryNews;
 import com.example.huangxueqin.zhihudaily.models.LatestNews;
 import com.example.huangxueqin.zhihudaily.models.News;
+import com.example.huangxueqin.zhihudaily.provider.NewsContact;
 import com.example.huangxueqin.zhihudaily.ui.widget.CirclePageIndicator;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -29,8 +33,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     public static final int TYPE_LIST_ITEM_NEWS = 1;
     public static final int TYPE_LIST_ITEM_DATE = 2;
 
+    private Context mContext;
     private List<LatestNews.TopStory> mTopStories;
     private List<News> mStories;
+    private HashSet<String> mReadNewses;
 
     private String mFirstDate;
     private String mLastDate;
@@ -39,19 +45,20 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     private boolean mHasGallery;
     private INewsListItemClickListener mListener;
 
-    public NewsListAdapter(LatestNews latestNews) {
-        this(latestNews, null, 0);
+    public NewsListAdapter(Context context, LatestNews latestNews) {
+        this(context, latestNews, null, 0);
     }
 
-    public NewsListAdapter(LatestNews latestNews, INewsListItemClickListener listener) {
-        this(latestNews, listener, 0);
+    public NewsListAdapter(Context context, LatestNews latestNews, INewsListItemClickListener listener) {
+        this(context, latestNews, listener, 0);
     }
 
-    public NewsListAdapter(LatestNews latestNews, int galleryStartIndex) {
-        this(latestNews, null, galleryStartIndex);
+    public NewsListAdapter(Context context, LatestNews latestNews, int galleryStartIndex) {
+        this(context, latestNews, null, galleryStartIndex);
     }
 
-    public NewsListAdapter(LatestNews latestNews, INewsListItemClickListener listener, int galleryStartIndex) {
+    public NewsListAdapter(Context context, LatestNews latestNews, INewsListItemClickListener listener, int galleryStartIndex) {
+        mContext = context;
         mTopStories = latestNews.top_stories;
         mStories = new ArrayList<>();
         mStories.add(createDateItem(latestNews.date));
@@ -67,6 +74,19 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         News emptyStory = new News();
         emptyStory.date = date;
         return emptyStory;
+    }
+
+    public void setReadNewses(HashSet<String> set) {
+        mReadNewses = set;
+        for(int i = 0; i < mStories.size(); i++) {
+            String id = mStories.get(i).id;
+            if(id != null && mReadNewses.contains(id)) {
+                mStories.get(i).read = true;
+            }
+            else {
+                mStories.get(i).read = false;
+            }
+        }
     }
 
     public void addHistoryNews(HistoryNews historyNews) {
@@ -134,6 +154,12 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         else if(itemType == TYPE_LIST_ITEM_NEWS){
             News story = (News) getItem(position);
             holder.mNewsTitle.setText(story.title);
+            if(story.read) {
+                holder.mNewsTitle.setTextColor(mContext.getResources().getColor(R.color.item_read));
+            }
+            else {
+                holder.mNewsTitle.setTextColor(mContext.getResources().getColor(R.color.item_unread));
+            }
             Glide.with(holder.mNewsThumb.getContext())
                     .load(story.images.get(0))
                     .into(holder.mNewsThumb);
@@ -209,16 +235,24 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
         @Override
         public void onClick(View view) {
-            String id = null;
-            Object o = getItem(mPosition);
-            id = ((News) o).id;
+            News news = (News) getItem(mPosition);
             if(mListener != null) {
-                mListener.onRequestNews(id);
+                mListener.onRequestNews(news.id);
+            }
+            if(!news.read) {
+                ContentValues values = new ContentValues();
+                values.put(NewsContact.ReadNewses.NEWS_ID, news.id);
+                values.put(NewsContact.ReadNewses.NEWS_DATE, news.date);
+                values.put(NewsContact.ReadNewses.NEWS_GA_PREFIX, news.date);
+                values.put(NewsContact.ReadNewses.NEWS_TITLE, news.title);
+                values.put(NewsContact.ReadNewses.NEWS_TYPE, news.type);
+                mContext.getContentResolver().insert(NewsContact.ReadNewses.CONTENT_URI, values);
+                mReadNewses.add(news.id);
+                news.read = true;
+                mNewsTitle.setTextColor(mContext.getResources().getColor(R.color.item_read));
             }
         }
     }
-
-
 
     private static void D(String msg) {
         Log.d("NewListAdapter", msg);

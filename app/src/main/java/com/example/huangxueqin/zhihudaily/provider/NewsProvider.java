@@ -1,4 +1,4 @@
-package com.example.huangxueqin.zhihudaily.db;
+package com.example.huangxueqin.zhihudaily.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;

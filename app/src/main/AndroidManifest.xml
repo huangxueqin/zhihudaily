@@ -26,6 +26,10 @@
         <activity android:name=".ui.activities.NewsPresentActivity"
             android:screenOrientation="portrait" />
 
+        <provider
+            android:authorities="com.example.huangxueqin.zhihudaily.provider.news"
+            android:name=".provider.NewsProvider" />
+
     </application>
 
 </manifest>

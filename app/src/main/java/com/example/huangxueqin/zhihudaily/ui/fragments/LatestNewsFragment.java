@@ -1,6 +1,7 @@
 package com.example.huangxueqin.zhihudaily.ui.fragments;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,10 +18,13 @@ import com.example.huangxueqin.zhihudaily.interfaces.INewsListItemClickListener;
 import com.example.huangxueqin.zhihudaily.models.HistoryNews;
 import com.example.huangxueqin.zhihudaily.models.LatestNews;
 import com.example.huangxueqin.zhihudaily.common.Constants;
+import com.example.huangxueqin.zhihudaily.provider.NewsContact;
 import com.example.huangxueqin.zhihudaily.ui.activities.NewsPresentActivity;
 import com.example.huangxueqin.zhihudaily.ui.adapters.NewsListAdapter;
 import com.example.huangxueqin.zhihudaily.ui.widget.LineDecoration;
 import com.example.huangxueqin.zhihudaily.ui.widget.PullRefreshLayout;
+
+import java.util.HashSet;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,13 +38,13 @@ import retrofit2.Response;
 public class LatestNewsFragment extends BaseFragment implements INewsListItemClickListener, PullRefreshLayout.OnRefreshListener {
     private static final String TAG = "LatestNewsFragment TAG";
 
-
     private enum RequestAction {ACTION_REQUEST_LATEST, ACTION_REQUEST_HISTORY};
 
     @BindView(R.id.news_refresher) PullRefreshLayout mRefresher;
     @BindView(R.id.latest_news_list) RecyclerView mNewsList;
     private boolean mCancel;
     private boolean mIsLoadHistoryNews;
+    private HashSet<String> mReadNewses = new HashSet<>();
 
 
     @Nullable
@@ -52,11 +56,24 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
         mNewsList.setLayoutManager(new LinearLayoutManager(getContext()));
         mNewsList.addItemDecoration(new LineDecoration(getContext()));
         mNewsList.addOnScrollListener(mNewsListScrollListener);
+        loadReadNewses();
         requestNewsByAction(RequestAction.ACTION_REQUEST_LATEST);
         return v;
     }
 
-    void requestNewsByAction(RequestAction action, String... params) {
+    private void loadReadNewses() {
+        mReadNewses.clear();
+        Cursor cursor = getContext().getContentResolver()
+                .query(NewsContact.ReadNewses.CONTENT_URI, new String[] {NewsContact.ReadNewses.NEWS_ID}, null, null, null);
+        while(cursor.moveToNext()) {
+            int idIndex = cursor.getColumnIndex(NewsContact.ReadNewses.NEWS_ID);
+            String id = cursor.getString(idIndex);
+            mReadNewses.add(id);
+        }
+        cursor.close();
+    }
+
+    private void requestNewsByAction(RequestAction action, String... params) {
         switch (action) {
             case ACTION_REQUEST_LATEST:
                 Call<LatestNews> latestNewsCall = mAPI.getLatestNews();
@@ -75,7 +92,9 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
         @Override
         public void onResponse(Call<LatestNews> call, Response<LatestNews> response) {
             if(!mCancel) {
-                mNewsList.setAdapter(new NewsListAdapter(response.body(), LatestNewsFragment.this));
+                NewsListAdapter adapter = new NewsListAdapter(getActivity(), response.body(), LatestNewsFragment.this);
+                adapter.setReadNewses(mReadNewses);
+                mNewsList.setAdapter(adapter);
             }
             mRefresher.setRefresh(false);
         }

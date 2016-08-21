@@ -1,4 +1,4 @@
-package com.example.huangxueqin.zhihudaily.db;
+package com.example.huangxueqin.zhihudaily.provider;
 
 
 import android.net.Uri;
@@ -24,8 +24,8 @@ public final class NewsContact {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + NewsProvider.AUTHORITY);
     public static final String PATH_READ_NEWSES = NewsDatabase.Tables.ReadNewses;
 
-    static class ReadNewses implements ReadNewsesColumns {
-        private static final Uri CONTENT_URI =
+    public static class ReadNewses implements ReadNewsesColumns {
+        public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_READ_NEWSES).build();
 
         public static Uri buildReadNewsesUri(String news_id) {

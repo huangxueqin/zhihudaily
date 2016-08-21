@@ -12,4 +12,7 @@ public class News {
     public ArrayList<String> images;
     public Integer type;
     public String id;
+
+    // extra data
+    public boolean read;
 }

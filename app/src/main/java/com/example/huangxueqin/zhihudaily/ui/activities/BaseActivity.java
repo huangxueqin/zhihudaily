@@ -3,6 +3,7 @@ package com.example.huangxueqin.zhihudaily.ui.activities;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import com.example.huangxueqin.zhihudaily.common.Constants;
 import com.example.huangxueqin.zhihudaily.common.ZhihuAPI;
@@ -16,6 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class BaseActivity extends AppCompatActivity {
     protected Retrofit mRetrofit;
     protected ZhihuAPI mAPI;
+    protected Toolbar mToolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,5 +27,13 @@ public class BaseActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         mAPI = mRetrofit.create(ZhihuAPI.class);
+    }
+
+    protected final void setToolbarTitle(String title) {
+
+    }
+
+    protected final void setToolbarTitle(int id) {
+
     }
 }

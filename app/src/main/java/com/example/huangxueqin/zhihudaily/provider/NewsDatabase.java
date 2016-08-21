@@ -1,4 +1,4 @@
-package com.example.huangxueqin.zhihudaily.db;
+package com.example.huangxueqin.zhihudaily.provider;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -28,14 +28,14 @@ public class NewsDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE_TABLE " + Tables.ReadNewses + " ("
+        db.execSQL("CREATE TABLE " + Tables.ReadNewses + " ("
                 + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + NewsContact.ReadNewses.NEWS_ID + " TEXT NOT NULL,"
-                + NewsContact.ReadNewses.NEWS_DATE + "TEXT,"
-                + NewsContact.ReadNewses.NEWS_TITLE + "TEXT,"
-                + NewsContact.ReadNewses.NEWS_IMAGES + "TEXT,"
-                + NewsContact.ReadNewses.NEWS_TYPE + "INTEGER,"
-                + NewsContact.ReadNewses.NEWS_GA_PREFIX + "TEXT"
+                + NewsContact.ReadNewses.NEWS_DATE + " TEXT,"
+                + NewsContact.ReadNewses.NEWS_TITLE + " TEXT,"
+                + NewsContact.ReadNewses.NEWS_IMAGES + " TEXT,"
+                + NewsContact.ReadNewses.NEWS_TYPE + " INTEGER,"
+                + NewsContact.ReadNewses.NEWS_GA_PREFIX + " TEXT,"
                 + "UNIQUE (" + NewsContact.ReadNewses.NEWS_ID + ") ON CONFLICT REPLACE)"
         );
     }
