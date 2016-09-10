@@ -10,4 +10,7 @@
     <string name="refresh_ongoing">正在刷新</string>
 
     <string name="today_news_header">今日热闻</string>
+
+
+    <string name="menu_search">搜索</string>
 </resources>

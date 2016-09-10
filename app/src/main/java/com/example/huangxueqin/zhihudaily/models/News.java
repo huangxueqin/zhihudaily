@@ -15,4 +15,6 @@ public class News {
 
     // extra data
     public boolean read;
+    public int prev;
+    public int next;
 }

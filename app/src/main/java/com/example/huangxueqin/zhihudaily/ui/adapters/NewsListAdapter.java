@@ -40,6 +40,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
 
     private String mFirstDate;
     private String mLastDate;
+    private int mLastDateItemIndex;
 
     private int mCurrentGalleryIndex;
     private boolean mHasGallery;
@@ -61,19 +62,27 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
         mContext = context;
         mTopStories = latestNews.top_stories;
         mStories = new ArrayList<>();
-        mStories.add(createDateItem(latestNews.date));
+        mStories.add(createDateItem(latestNews.date, -1, -1));
+        mLastDateItemIndex = 0;
         mStories.addAll(latestNews.stories);
+        for(int i = mLastDateItemIndex+1; i < mStories.size(); i++) {
+            mStories.get(i).date = latestNews.date;
+        }
         mFirstDate = mLastDate = latestNews.date;
+
 
         mCurrentGalleryIndex = galleryStartIndex;
         mHasGallery = mTopStories != null && mTopStories.size() != 0;
         mListener = listener;
     }
 
-    private News createDateItem(String date) {
-        News emptyStory = new News();
-        emptyStory.date = date;
-        return emptyStory;
+    private News createDateItem(String date, int prev, int next) {
+        News d = new News();
+        d.date = date;
+        d.prev = prev;
+        d.next = next;
+
+        return d;
     }
 
     public void setReadNewses(HashSet<String> set) {
@@ -90,8 +99,19 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     public void addHistoryNews(HistoryNews historyNews) {
-        mStories.add(createDateItem(historyNews.date));
+        for(News news : historyNews.stories) {
+            if(mReadNewses.contains(news.id)) {
+                news.read = true;
+            }
+        }
+        mStories.get(mLastDateItemIndex).next = mStories.size();
+        mStories.add(createDateItem(historyNews.date, mLastDateItemIndex, -1));
+        mLastDateItemIndex = mStories.size() - 1;
+
         mStories.addAll(historyNews.stories);
+        for(int i = mLastDateItemIndex+1; i < mStories.size(); i++) {
+            mStories.get(i).date = historyNews.date;
+        }
         mLastDate = historyNews.date;
         notifyDataSetChanged();
     }
@@ -99,6 +119,17 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     public String getNextDateUnloaded() {
 //        return mLastDate != null ? DateTools.getDateStr(mLastDate, 1) : null;
         return mLastDate;
+    }
+
+    public String getDateStrForItemAtPosition(int position) {
+        int type = getItemViewType(position);
+        if(type == TYPE_GALLERY) {
+            return mContext.getResources().getString(R.string.today_news_header);
+        }
+        else if(type == TYPE_LIST_ITEM_DATE || type == TYPE_LIST_ITEM_NEWS) {
+            return DateTools.getReadableDateStr(((News)getItem(position)).date);
+        }
+        return mContext.getResources().getString(R.string.app_name);
     }
 
     @Override

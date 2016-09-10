@@ -63,8 +63,9 @@ public class SplashActivity extends BaseActivity implements Callback<StartImageI
     private Runnable mStartMainRunnable = new Runnable() {
         @Override
         public void run() {
+            Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
+            startActivity(mainIntent);
             finish();
-            startActivity(new Intent(SplashActivity.this, MainActivity.class));
         }
     };
 

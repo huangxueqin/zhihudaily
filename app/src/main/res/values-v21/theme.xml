@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:colorPrimary">#2c3e50</item>
+        <item name="android:colorPrimaryDark">#1c2e40</item>
+        <item name="android:colorAccent">#16a085</item>
+        <item name="colorPrimary">#2c3e50</item>
+        <item name="colorPrimaryDark">#1c2e40</item>
+        <item name="colorAccent">#16a085</item>
+
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <!-- splash screen theme -->
+    <style name="AppSplashTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:colorPrimary">@color/splashPrimary</item>
+        <item name="android:colorPrimaryDark">@color/splashPrimaryDark</item>
+        <item name="colorPrimary">@color/splashPrimary</item>
+        <item name="colorPrimaryDark">@color/splashPrimaryDark</item>
+
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+</resources>

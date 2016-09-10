@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.AppBarLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/appbar"
+    style="@style/MyAppbarLayoutBaseStyle">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        style="@style/MyToolbarBaseStyle"
+        app:layout_scrollFlags="scroll|enterAlways">
+    </android.support.v7.widget.Toolbar>
+</android.support.design.widget.AppBarLayout>

@@ -5,15 +5,17 @@ import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.huangxueqin.zhihudaily.R;
-import com.example.huangxueqin.zhihudaily.common.DateTools;
 import com.example.huangxueqin.zhihudaily.interfaces.INewsListItemClickListener;
 import com.example.huangxueqin.zhihudaily.models.HistoryNews;
 import com.example.huangxueqin.zhihudaily.models.LatestNews;
@@ -43,9 +45,9 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
     @BindView(R.id.news_refresher) PullRefreshLayout mRefresher;
     @BindView(R.id.latest_news_list) RecyclerView mNewsList;
     private boolean mCancel;
-    private boolean mIsLoadHistoryNews;
+    private boolean mIsLoadingHistoryNews;
     private HashSet<String> mReadNewses = new HashSet<>();
-
+    private NewsListAdapter mNewsListAdapter;
 
     @Nullable
     @Override
@@ -58,6 +60,8 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
         mNewsList.addOnScrollListener(mNewsListScrollListener);
         loadReadNewses();
         requestNewsByAction(RequestAction.ACTION_REQUEST_LATEST);
+
+        setHasOptionsMenu(true);
         return v;
     }
 
@@ -71,6 +75,11 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
             mReadNewses.add(id);
         }
         cursor.close();
+    }
+
+    private void setActivityTitle(String title) {
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.getSupportActionBar().setTitle(title);
     }
 
     private void requestNewsByAction(RequestAction action, String... params) {
@@ -92,9 +101,9 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
         @Override
         public void onResponse(Call<LatestNews> call, Response<LatestNews> response) {
             if(!mCancel) {
-                NewsListAdapter adapter = new NewsListAdapter(getActivity(), response.body(), LatestNewsFragment.this);
-                adapter.setReadNewses(mReadNewses);
-                mNewsList.setAdapter(adapter);
+                mNewsListAdapter = new NewsListAdapter(getActivity(), response.body(), LatestNewsFragment.this);
+                mNewsListAdapter.setReadNewses(mReadNewses);
+                mNewsList.setAdapter(mNewsListAdapter);
             }
             mRefresher.setRefresh(false);
         }
@@ -110,18 +119,23 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
         @Override
         public void onResponse(Call<HistoryNews> call, Response<HistoryNews> response) {
             if(!mCancel) {
-                NewsListAdapter adapter = (NewsListAdapter) mNewsList.getAdapter();
                 HistoryNews historyNews = response.body();
-                adapter.addHistoryNews(response.body());
+                mNewsListAdapter.addHistoryNews(response.body());
             }
-            mIsLoadHistoryNews = false;
+            mIsLoadingHistoryNews = false;
         }
 
         @Override
         public void onFailure(Call<HistoryNews> call, Throwable t) {
-            mIsLoadHistoryNews = false;
+            mIsLoadingHistoryNews = false;
         }
     };
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.main, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
 
     @Override
     public void onRequestNews(String id) {
@@ -139,10 +153,14 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
-            if(dy > 0 && !canNewsListScrollDown() && !mIsLoadHistoryNews) {
+            if(mNewsList.getChildCount() > 0) {
+                LinearLayoutManager lm = (LinearLayoutManager) mNewsList.getLayoutManager();
+                setActivityTitle(mNewsListAdapter.getDateStrForItemAtPosition(lm.findFirstVisibleItemPosition()));
+            }
+            if(dy > 0 && !canNewsListScrollDown() && !mIsLoadingHistoryNews) {
                 NewsListAdapter adapter = (NewsListAdapter) mNewsList.getAdapter();
                 requestNewsByAction(RequestAction.ACTION_REQUEST_HISTORY, adapter.getNextDateUnloaded());
-                mIsLoadHistoryNews = true;
+                mIsLoadingHistoryNews = true;
             }
         }
     };
