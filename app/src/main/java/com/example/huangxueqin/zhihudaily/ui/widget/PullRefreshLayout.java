@@ -468,7 +468,7 @@ public class PullRefreshLayout extends ViewGroup {
     }
 
     private ValueAnimator initTransitAnimation(int start, int end, int duration) {
-        ObjectAnimator transitAnimator = ObjectAnimator.ofInt(this, "CurrentTargetOffsetTop", start, end);
+        ObjectAnimator transitAnimator = ObjectAnimator.ofInt(this, "currentTargetOffsetTop", start, end);
         transitAnimator.setInterpolator(new DecelerateInterpolator());
         transitAnimator.setDuration(duration);
         return transitAnimator;

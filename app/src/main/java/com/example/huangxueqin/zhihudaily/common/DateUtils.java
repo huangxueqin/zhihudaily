@@ -9,7 +9,7 @@ import java.util.Date;
 /**
  * Created by huangxueqin on 16/8/15.
  */
-public class DateTools {
+public class DateUtils {
     private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyyMMdd");
     private static final SimpleDateFormat READABLE_FORMATTER = new SimpleDateFormat("MM月dd日");
     /**

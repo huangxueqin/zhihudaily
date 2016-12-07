@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.huangxueqin.zhihudaily.R;
-import com.example.huangxueqin.zhihudaily.common.DateTools;
+import com.example.huangxueqin.zhihudaily.common.DateUtils;
 import com.example.huangxueqin.zhihudaily.interfaces.INewsListItemClickListener;
 import com.example.huangxueqin.zhihudaily.models.HistoryNews;
 import com.example.huangxueqin.zhihudaily.models.LatestNews;
@@ -117,7 +117,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     public String getNextDateUnloaded() {
-//        return mLastDate != null ? DateTools.getDateStr(mLastDate, 1) : null;
+//        return mLastDate != null ? DateUtils.getDateStr(mLastDate, 1) : null;
         return mLastDate;
     }
 
@@ -127,7 +127,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             return mContext.getResources().getString(R.string.today_news_header);
         }
         else if(type == TYPE_LIST_ITEM_DATE || type == TYPE_LIST_ITEM_NEWS) {
-            return DateTools.getReadableDateStr(((News)getItem(position)).date);
+            return DateUtils.getReadableDateStr(((News)getItem(position)).date);
         }
         return mContext.getResources().getString(R.string.app_name);
     }
@@ -202,7 +202,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
             }
             else {
                 News emptyStory = (News) getItem(position);
-                holder.mNewsGroupHeaderText.setText(DateTools.getReadableDateStr(emptyStory.date));
+                holder.mNewsGroupHeaderText.setText(DateUtils.getReadableDateStr(emptyStory.date));
             }
         }
     }
