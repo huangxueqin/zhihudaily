@@ -64,7 +64,7 @@ public class StoryListAdapter extends RecyclerView.Adapter<StoryListAdapter.View
         notifyDataSetChanged();
     }
 
-    public String readableDateOfPosition(int position) {
+    public String headerOfPosition(int position) {
         // if top stories
         if (isTopStories(position)) {
             return storiesList.get(0).header;

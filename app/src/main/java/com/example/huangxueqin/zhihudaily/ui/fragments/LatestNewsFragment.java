@@ -158,11 +158,11 @@ public class LatestNewsFragment extends BaseFragment implements IStoryListItemCl
             super.onScrolled(recyclerView, dx, dy);
             if(mNewsList.getChildCount() > 0) {
                 LinearLayoutManager lm = (LinearLayoutManager) mNewsList.getLayoutManager();
-                setActivityTitle(mNewsListAdapter.readableDateOfPosition(lm.findFirstVisibleItemPosition()));
+                setActivityTitle(mNewsListAdapter.headerOfPosition(lm.findFirstVisibleItemPosition()));
             }
             if(dy > 0 && !canNewsListScrollDown() && !mIsLoadingHistoryNews) {
                 StoryListAdapter adapter = (StoryListAdapter) mNewsList.getAdapter();
-                requestNewsByAction(RequestAction.ACTION_REQUEST_HISTORY, DateUtils.getDateStr(mOldestDate, 1));
+                requestNewsByAction(RequestAction.ACTION_REQUEST_HISTORY, mOldestDate);
                 mIsLoadingHistoryNews = true;
             }
         }
