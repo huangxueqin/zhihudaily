@@ -7,7 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.example.huangxueqin.zhihudaily.R;
-import com.example.huangxueqin.zhihudaily.ui.adapters.NewsListAdapter;
+import com.example.huangxueqin.zhihudaily.ui.adapters.StoryListAdapter;
 
 /**
  * Created by huangxueqin on 16-7-25.
@@ -27,12 +27,14 @@ public class LineDecoration extends RecyclerView.ItemDecoration {
     @Override
     public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
         int count = parent.getLayoutManager().getChildCount();
-        NewsListAdapter adapter = (NewsListAdapter) parent.getAdapter();
+        StoryListAdapter adapter = (StoryListAdapter) parent.getAdapter();
         if(adapter != null) {
             for (int i = 0; i < count - 1; i++) {
                 View child = parent.getChildAt(i);
+                int alpha = (int) (child.getAlpha() * 255);
+                mPaint.setAlpha(alpha);
                 int position = parent.getLayoutManager().getPosition(child);
-                if (adapter.getItemViewType(position) == NewsListAdapter.TYPE_LIST_ITEM_NEWS) {
+                if (adapter.getItemViewType(position) == StoryListAdapter.TYPE_LIST_STORY) {
                     c.drawLine(mLinePadding, child.getBottom(), parent.getWidth() - mLinePadding, child.getBottom(), mPaint);
                 }
             }

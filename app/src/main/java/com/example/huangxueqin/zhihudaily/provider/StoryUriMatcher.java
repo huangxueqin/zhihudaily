@@ -7,32 +7,32 @@ import android.util.SparseArray;
 /**
  * Created by huangxueqin on 16/8/21.
  */
-public class NewsProviderUriMatcher {
+public class StoryUriMatcher {
     private UriMatcher mUriMatcher;
-    private SparseArray<NewsUriEnum> mEnumsMap = new SparseArray<>();
+    private SparseArray<StoryUriEnum> mEnumsMap = new SparseArray<>();
 
-    public NewsProviderUriMatcher() {
+    public StoryUriMatcher() {
         mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         buildUriMatcher();
     }
 
     private void buildUriMatcher() {
-        String authority = NewsProvider.AUTHORITY;
-        NewsUriEnum[] uris = NewsUriEnum.values();
-        for(NewsUriEnum item : uris) {
+        String authority = StoryProvider.AUTHORITY;
+        StoryUriEnum[] uris = StoryUriEnum.values();
+        for(StoryUriEnum item : uris) {
             mUriMatcher.addURI(authority, item.path, item.code);
         }
         buildEnumsMap();
     }
 
     private void buildEnumsMap() {
-        NewsUriEnum[] uris = NewsUriEnum.values();
-        for(NewsUriEnum uri : uris) {
+        StoryUriEnum[] uris = StoryUriEnum.values();
+        for(StoryUriEnum uri : uris) {
             mEnumsMap.put(uri.code, uri);
         }
     }
 
-    public NewsUriEnum matchUri(Uri uri) {
+    public StoryUriEnum matchUri(Uri uri) {
         int code = mUriMatcher.match(uri);
         try {
             return matchCode(code);
@@ -41,8 +41,8 @@ public class NewsProviderUriMatcher {
         }
     }
 
-    public NewsUriEnum matchCode(int code) {
-        NewsUriEnum item = mEnumsMap.get(code);
+    public StoryUriEnum matchCode(int code) {
+        StoryUriEnum item = mEnumsMap.get(code);
         if(item != null) {
             return item;
         }

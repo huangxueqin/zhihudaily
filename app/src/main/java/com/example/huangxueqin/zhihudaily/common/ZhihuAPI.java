@@ -1,9 +1,8 @@
 package com.example.huangxueqin.zhihudaily.common;
 
-import com.example.huangxueqin.zhihudaily.models.HistoryNews;
-import com.example.huangxueqin.zhihudaily.models.LatestNews;
-import com.example.huangxueqin.zhihudaily.models.NewsContent;
 import com.example.huangxueqin.zhihudaily.models.StartImageInfo;
+import com.example.huangxueqin.zhihudaily.models.story.FineStory;
+import com.example.huangxueqin.zhihudaily.models.story.StoryResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -26,11 +25,11 @@ public interface ZhihuAPI {
     Call<StartImageInfo> get1080StartImage();
 
     @GET("4/news/latest")
-    Call<LatestNews> getLatestNews();
+    Call<StoryResponse> getLatestNews();
 
     @GET("4/news/{id}")
-    Call<NewsContent> getNewsContent(@Path("id") String id);
+    Call<FineStory> getNewsContent(@Path("id") String id);
 
     @GET("4/news/before/{date}")
-    Call<HistoryNews> getHistoryNews(@Path("date") String date);
+    Call<StoryResponse> getHistoryNews(@Path("date") String date);
 }

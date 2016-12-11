@@ -16,14 +16,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.huangxueqin.zhihudaily.R;
-import com.example.huangxueqin.zhihudaily.interfaces.INewsListItemClickListener;
-import com.example.huangxueqin.zhihudaily.models.HistoryNews;
-import com.example.huangxueqin.zhihudaily.models.LatestNews;
+import com.example.huangxueqin.zhihudaily.common.DateUtils;
+import com.example.huangxueqin.zhihudaily.interfaces.IStoryListItemClickListener;
 import com.example.huangxueqin.zhihudaily.common.Constants;
-import com.example.huangxueqin.zhihudaily.provider.NewsContact;
+import com.example.huangxueqin.zhihudaily.models.story.StoryResponse;
+import com.example.huangxueqin.zhihudaily.provider.StoryContact;
 import com.example.huangxueqin.zhihudaily.ui.activities.NewsPresentActivity;
-import com.example.huangxueqin.zhihudaily.ui.adapters.NewsListAdapter;
-import com.example.huangxueqin.zhihudaily.ui.widget.LineDecoration;
+import com.example.huangxueqin.zhihudaily.ui.adapters.StoryListAdapter;
 import com.example.huangxueqin.zhihudaily.ui.widget.PullRefreshLayout;
 
 import java.util.HashSet;
@@ -37,7 +36,7 @@ import retrofit2.Response;
 /**
  * Created by huangxueqin on 16-7-22.
  */
-public class LatestNewsFragment extends BaseFragment implements INewsListItemClickListener, PullRefreshLayout.OnRefreshListener {
+public class LatestNewsFragment extends BaseFragment implements IStoryListItemClickListener, PullRefreshLayout.OnRefreshListener {
     private static final String TAG = "LatestNewsFragment TAG";
 
     private enum RequestAction {ACTION_REQUEST_LATEST, ACTION_REQUEST_HISTORY};
@@ -46,8 +45,9 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
     @BindView(R.id.latest_news_list) RecyclerView mNewsList;
     private boolean mCancel;
     private boolean mIsLoadingHistoryNews;
-    private HashSet<String> mReadNewses = new HashSet<>();
-    private NewsListAdapter mNewsListAdapter;
+    private final HashSet<Long> mReadNewses = new HashSet<>();
+    private StoryListAdapter mNewsListAdapter;
+    private String mOldestDate;
 
     @Nullable
     @Override
@@ -56,22 +56,21 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
         ButterKnife.bind(this, v);
         mRefresher.setOnRefreshListener(this);
         mNewsList.setLayoutManager(new LinearLayoutManager(getContext()));
-        mNewsList.addItemDecoration(new LineDecoration(getContext()));
+//        mNewsList.addItemDecoration(new LineDecoration(getContext()));
         mNewsList.addOnScrollListener(mNewsListScrollListener);
-        loadReadNewses();
+        loadReadRecordOnce();
         requestNewsByAction(RequestAction.ACTION_REQUEST_LATEST);
 
         setHasOptionsMenu(true);
         return v;
     }
 
-    private void loadReadNewses() {
-        mReadNewses.clear();
+    private void loadReadRecordOnce() {
         Cursor cursor = getContext().getContentResolver()
-                .query(NewsContact.ReadNewses.CONTENT_URI, new String[] {NewsContact.ReadNewses.NEWS_ID}, null, null, null);
+                .query(StoryContact.ReadNewses.CONTENT_URI, new String[] {StoryContact.ReadNewses.NEWS_ID}, null, null, null);
         while(cursor.moveToNext()) {
-            int idIndex = cursor.getColumnIndex(NewsContact.ReadNewses.NEWS_ID);
-            String id = cursor.getString(idIndex);
+            int idIndex = cursor.getColumnIndex(StoryContact.ReadNewses.NEWS_ID);
+            long id = cursor.getLong(idIndex);
             mReadNewses.add(id);
         }
         cursor.close();
@@ -85,48 +84,50 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
     private void requestNewsByAction(RequestAction action, String... params) {
         switch (action) {
             case ACTION_REQUEST_LATEST:
-                Call<LatestNews> latestNewsCall = mAPI.getLatestNews();
+                Call<StoryResponse> latestNewsCall = mAPI.getLatestNews();
                 latestNewsCall.enqueue(mLatestNewsCallback);
                 break;
             case ACTION_REQUEST_HISTORY:
                 String date = params[0];
                 D("request history news, Data: " + date);
-                Call<HistoryNews> historyNewsCall = mAPI.getHistoryNews(date);
+                Call<StoryResponse> historyNewsCall = mAPI.getHistoryNews(date);
                 historyNewsCall.enqueue(mHistoryNewsCallback);
                 break;
         }
     }
 
-    private Callback<LatestNews> mLatestNewsCallback = new Callback<LatestNews>() {
+    private Callback<StoryResponse> mLatestNewsCallback = new Callback<StoryResponse>() {
         @Override
-        public void onResponse(Call<LatestNews> call, Response<LatestNews> response) {
+        public void onResponse(Call<StoryResponse> call, Response<StoryResponse> response) {
             if(!mCancel) {
-                mNewsListAdapter = new NewsListAdapter(getActivity(), response.body(), LatestNewsFragment.this);
-                mNewsListAdapter.setReadNewses(mReadNewses);
+                mNewsListAdapter = new StoryListAdapter(getActivity(), response.body(), LatestNewsFragment.this);
+                mNewsListAdapter.setReadRecords(mReadNewses);
                 mNewsList.setAdapter(mNewsListAdapter);
+                mOldestDate = response.body().date;
             }
             mRefresher.setRefresh(false);
         }
 
         @Override
-        public void onFailure(Call<LatestNews> call, Throwable t) {
+        public void onFailure(Call<StoryResponse> call, Throwable t) {
             mRefresher.setRefresh(false);
         }
     };
 
 
-    private Callback<HistoryNews> mHistoryNewsCallback = new Callback<HistoryNews>() {
+    private Callback<StoryResponse> mHistoryNewsCallback = new Callback<StoryResponse>() {
         @Override
-        public void onResponse(Call<HistoryNews> call, Response<HistoryNews> response) {
+        public void onResponse(Call<StoryResponse> call, Response<StoryResponse> response) {
             if(!mCancel) {
-                HistoryNews historyNews = response.body();
-                mNewsListAdapter.addHistoryNews(response.body());
+                StoryResponse historyNews = response.body();
+                mNewsListAdapter.appendHistoryStories(historyNews);
+                mOldestDate = historyNews.date;
             }
             mIsLoadingHistoryNews = false;
         }
 
         @Override
-        public void onFailure(Call<HistoryNews> call, Throwable t) {
+        public void onFailure(Call<StoryResponse> call, Throwable t) {
             mIsLoadingHistoryNews = false;
         }
     };
@@ -138,7 +139,9 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
     }
 
     @Override
-    public void onRequestNews(String id) {
+    public void onRequestNews(long id) {
+        mReadNewses.add(id);
+        mNewsListAdapter.notifyDataSetChanged();
         Intent i = new Intent(getActivity(), NewsPresentActivity.class);
         i.putExtra(Constants.IntentKeys.KEY_NEWS_ID, id);
         startActivity(i);
@@ -155,11 +158,11 @@ public class LatestNewsFragment extends BaseFragment implements INewsListItemCli
             super.onScrolled(recyclerView, dx, dy);
             if(mNewsList.getChildCount() > 0) {
                 LinearLayoutManager lm = (LinearLayoutManager) mNewsList.getLayoutManager();
-                setActivityTitle(mNewsListAdapter.getDateStrForItemAtPosition(lm.findFirstVisibleItemPosition()));
+                setActivityTitle(mNewsListAdapter.readableDateOfPosition(lm.findFirstVisibleItemPosition()));
             }
             if(dy > 0 && !canNewsListScrollDown() && !mIsLoadingHistoryNews) {
-                NewsListAdapter adapter = (NewsListAdapter) mNewsList.getAdapter();
-                requestNewsByAction(RequestAction.ACTION_REQUEST_HISTORY, adapter.getNextDateUnloaded());
+                StoryListAdapter adapter = (StoryListAdapter) mNewsList.getAdapter();
+                requestNewsByAction(RequestAction.ACTION_REQUEST_HISTORY, DateUtils.getDateStr(mOldestDate, 1));
                 mIsLoadingHistoryNews = true;
             }
         }

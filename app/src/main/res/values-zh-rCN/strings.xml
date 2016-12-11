@@ -9,8 +9,8 @@
     <string name="refresh_prompt_release">释放刷新</string>
     <string name="refresh_ongoing">正在刷新</string>
 
-    <string name="today_news_header">今日热闻</string>
-
+    <string name="today_stories_header">今日热闻</string>
+    <string name="list_date_format">MM月dd日</string>
 
     <string name="menu_search">搜索</string>
 </resources>

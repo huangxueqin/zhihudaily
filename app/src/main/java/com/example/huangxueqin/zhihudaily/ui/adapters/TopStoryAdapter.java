@@ -8,25 +8,24 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.example.huangxueqin.zhihudaily.interfaces.INewsListItemClickListener;
-import com.example.huangxueqin.zhihudaily.models.LatestNews;
-
-import java.util.List;
+import com.example.huangxueqin.zhihudaily.interfaces.IStoryListItemClickListener;
+import com.example.huangxueqin.zhihudaily.models.story.SimpleStory;
 
 /**
  * Created by huangxueqin on 16-7-25.
  */
-public class TopNewAdapter extends PagerAdapter implements View.OnClickListener {
-    List<LatestNews.TopStory> mTopStories;
-    INewsListItemClickListener mListener;
+public class TopStoryAdapter extends PagerAdapter implements View.OnClickListener {
+    SimpleStory[] mTopStories;
+    IStoryListItemClickListener mListener;
 
-    public TopNewAdapter(List<LatestNews.TopStory> topStories) {
+    public TopStoryAdapter(IStoryListItemClickListener listener, SimpleStory... topStories) {
+        mListener = listener;
         mTopStories = topStories;
     }
 
     @Override
     public int getCount() {
-        return mTopStories != null ? mTopStories.size() : 0;
+        return mTopStories != null ? mTopStories.length : 0;
     }
 
     @Override
@@ -36,8 +35,8 @@ public class TopNewAdapter extends PagerAdapter implements View.OnClickListener 
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        String id = mTopStories.get(position).id;
-        String url = mTopStories.get(position).image;
+        long id = mTopStories[position].id;
+        String url = mTopStories[position].image;
         ImageView image = new ImageView(container.getContext());
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewPager.LayoutParams.MATCH_PARENT, ViewPager.LayoutParams.MATCH_PARENT);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -56,14 +55,14 @@ public class TopNewAdapter extends PagerAdapter implements View.OnClickListener 
         container.removeView((ImageView) object);
     }
 
-    public void setNewListClickListener(INewsListItemClickListener l) {
+    public void setNewListClickListener(IStoryListItemClickListener l) {
         mListener = l;
     }
 
     @Override
     public void onClick(View view) {
         if(mListener != null) {
-            mListener.onRequestNews((String) view.getTag());
+            mListener.onRequestNews((long) view.getTag());
         }
     }
 }

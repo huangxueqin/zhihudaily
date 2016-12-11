@@ -8,7 +8,7 @@ import android.provider.BaseColumns;
 /**
  * Created by huangxueqin on 16/8/21.
  */
-public class NewsDatabase extends SQLiteOpenHelper {
+public class StoryDatabase extends SQLiteOpenHelper {
     private static final String DB_NAME = "news.db";
 
     private static final int VER_2016_RELEASE_A = 100;
@@ -21,7 +21,7 @@ public class NewsDatabase extends SQLiteOpenHelper {
 
     private final Context mContext;
 
-    public NewsDatabase(Context context) {
+    public StoryDatabase(Context context) {
         super(context, DB_NAME, null, CUR_DATABASE_VERSION);
         mContext = context;
     }
@@ -30,13 +30,13 @@ public class NewsDatabase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + Tables.ReadNewses + " ("
                 + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + NewsContact.ReadNewses.NEWS_ID + " TEXT NOT NULL,"
-                + NewsContact.ReadNewses.NEWS_DATE + " TEXT,"
-                + NewsContact.ReadNewses.NEWS_TITLE + " TEXT,"
-                + NewsContact.ReadNewses.NEWS_IMAGES + " TEXT,"
-                + NewsContact.ReadNewses.NEWS_TYPE + " INTEGER,"
-                + NewsContact.ReadNewses.NEWS_GA_PREFIX + " TEXT,"
-                + "UNIQUE (" + NewsContact.ReadNewses.NEWS_ID + ") ON CONFLICT REPLACE)"
+                + StoryContact.ReadNewses.NEWS_ID + " INTEGER NOT NULL,"
+                + StoryContact.ReadNewses.NEWS_DATE + " TEXT,"
+                + StoryContact.ReadNewses.NEWS_TITLE + " TEXT,"
+                + StoryContact.ReadNewses.NEWS_IMAGES + " TEXT,"
+                + StoryContact.ReadNewses.NEWS_TYPE + " INTEGER,"
+                + StoryContact.ReadNewses.NEWS_GA_PREFIX + " TEXT,"
+                + "UNIQUE (" + StoryContact.ReadNewses.NEWS_ID + ") ON CONFLICT REPLACE)"
         );
     }
 

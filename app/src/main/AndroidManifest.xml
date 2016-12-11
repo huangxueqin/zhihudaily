@@ -12,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".ui.activities.SplashActivity"
+            android:noHistory="true"
             android:theme="@style/AppSplashTheme"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -28,7 +29,7 @@
 
         <provider
             android:authorities="com.example.huangxueqin.zhihudaily.provider.news"
-            android:name=".provider.NewsProvider" />
+            android:name=".provider.StoryProvider" />
 
     </application>
 

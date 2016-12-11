@@ -1,9 +1,16 @@
 package com.example.huangxueqin.zhihudaily.ui.activities;
 
+import android.annotation.TargetApi;
+import android.app.ActivityOptions;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.transition.Fade;
+import android.transition.Slide;
 import android.util.Log;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -41,6 +48,11 @@ public class SplashActivity extends BaseActivity implements Callback<StartImageI
         super.onDestroy();
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
+
     private void loadStartImage() {
         int screenWidth = (Constants.getScreenSize(this)).x;
         Call<StartImageInfo> call = null;
@@ -64,8 +76,9 @@ public class SplashActivity extends BaseActivity implements Callback<StartImageI
         @Override
         public void run() {
             Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
+            mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(mainIntent);
-            finish();
+            overridePendingTransition(R.anim.activity_fade_in, R.anim.activity_fade_out);
         }
     };
 

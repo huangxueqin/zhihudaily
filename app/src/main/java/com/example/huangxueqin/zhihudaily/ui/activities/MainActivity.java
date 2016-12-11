@@ -1,10 +1,15 @@
 package com.example.huangxueqin.zhihudaily.ui.activities;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.Toolbar;
+import android.transition.Fade;
+import android.transition.Slide;
 import android.view.Menu;
+import android.view.Window;
 
 import com.example.huangxueqin.zhihudaily.R;
 import com.example.huangxueqin.zhihudaily.common.Constants;

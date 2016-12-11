@@ -6,7 +6,7 @@ import android.net.Uri;
 /**
  * Created by huangxueqin on 16/8/21.
  */
-public final class NewsContact {
+public final class StoryContact {
 
     public static final String CONTENT_TYPE_APP_BASE = "zhihudaily.";
     public static final String CONTENT_TYPE_BASE = "vnd.android.cursor.dir/vnd." + CONTENT_TYPE_APP_BASE;
@@ -21,8 +21,8 @@ public final class NewsContact {
         String NEWS_TYPE = "news_type";
     }
 
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + NewsProvider.AUTHORITY);
-    public static final String PATH_READ_NEWSES = NewsDatabase.Tables.ReadNewses;
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + StoryProvider.AUTHORITY);
+    public static final String PATH_READ_NEWSES = StoryDatabase.Tables.ReadNewses;
 
     public static class ReadNewses implements ReadNewsesColumns {
         public static final Uri CONTENT_URI =

@@ -1,17 +1,21 @@
 package com.example.huangxueqin.zhihudaily.common;
 
+import android.content.Context;
+
+import com.example.huangxueqin.zhihudaily.R;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by huangxueqin on 16/8/15.
  */
 public class DateUtils {
     private static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyyMMdd");
-    private static final SimpleDateFormat READABLE_FORMATTER = new SimpleDateFormat("MM月dd日");
     /**
      * get date string, eg: 2013.11.18 -> 20131118
      * @param index offset from today
@@ -35,11 +39,12 @@ public class DateUtils {
         return null;
     }
 
-    public static String getReadableDateStr(String dateStr) {
+    public static String getReadableDateStr(Context context, String dateStr) {
         try {
+            SimpleDateFormat formatter = new SimpleDateFormat(context.getResources().getString(R.string.list_date_format));
             Calendar ca = Calendar.getInstance();
             ca.setTime(FORMATTER.parse(dateStr));
-            return READABLE_FORMATTER.format(ca.getTime());
+            return formatter.format(ca.getTime());
         } catch (ParseException e) {
             e.printStackTrace();
         }

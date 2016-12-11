@@ -16,8 +16,8 @@ import com.bumptech.glide.Glide;
 import com.example.huangxueqin.zhihudaily.R;
 import com.example.huangxueqin.zhihudaily.common.ColorUtils;
 import com.example.huangxueqin.zhihudaily.common.ScreenUtils;
-import com.example.huangxueqin.zhihudaily.models.NewsContent;
 import com.example.huangxueqin.zhihudaily.common.Constants;
+import com.example.huangxueqin.zhihudaily.models.story.FineStory;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,7 +28,7 @@ import retrofit2.Response;
 /**
  * Created by huangxueqin on 16-7-26.
  */
-public class NewsPresentActivity extends BaseActivity implements Callback<NewsContent> {
+public class NewsPresentActivity extends BaseActivity implements Callback<FineStory> {
     private static final int TOOLBAR_HIDE_SHOW_DIST = 50;
 
     @BindView(R.id.content_presenter)
@@ -83,13 +83,13 @@ public class NewsPresentActivity extends BaseActivity implements Callback<NewsCo
     }
 
     private void loadNews(String id) {
-        Call<NewsContent> call = mAPI.getNewsContent(id);
+        Call<FineStory> call = mAPI.getNewsContent(id);
         call.enqueue(this);
     }
 
     @Override
-    public void onResponse(Call<NewsContent> call, Response<NewsContent> response) {
-        NewsContent content = response.body();
+    public void onResponse(Call<FineStory> call, Response<FineStory> response) {
+        FineStory content = response.body();
         Glide.with(this).load(content.image).into(mNewsImage);
         mNewsPresenter.loadDataWithBaseURL("x-data://base", buildHtml(content), "text/html", "UTF-8", "");
     }
@@ -103,15 +103,15 @@ public class NewsPresentActivity extends BaseActivity implements Callback<NewsCo
     }
 
     @Override
-    public void onFailure(Call<NewsContent> call, Throwable t) {
+    public void onFailure(Call<FineStory> call, Throwable t) {
     }
 
-    private String buildHtml(NewsContent content) {
+    private String buildHtml(FineStory content) {
 
         StringBuffer sb = new StringBuffer();
         sb.append("<div class=\"img-wrap\">")
                 .append("<h1 class=\"headline-title\">").append(content.title).append("</h1>")
-                .append("<span class=\"img-source\">").append(content.image_source).append("</span>")
+                .append("<span class=\"img-source\">").append(content.imageSource).append("</span>")
                 .append("<img src=\"").append(content.image).append("\" alt=\"\">")
                 .append("<div class=\"img-mask\"></div>");
         String body = content.body.replace("<div class=\"img-place-holder\"></div>", "");
@@ -128,11 +128,6 @@ public class NewsPresentActivity extends BaseActivity implements Callback<NewsCo
         }
         newsHtml.append("</head><body>");
         newsHtml.append(body);
-//        for(int i = 0; i < js.length; i++) {
-//            newsHtml.append("<script>");
-//            newsHtml.append(js[i]);
-//            newsHtml.append("</script>");
-//        }
         newsHtml.append("</body></html>");
 
         return newsHtml.toString();
